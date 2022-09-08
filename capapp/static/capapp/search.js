@@ -14,11 +14,11 @@ const app = Vue.createApp({
           this.search()
         },
         search: function() {
-            fetch(`/api/search/${this.page}/${search_query}`)
+            fetch(`/search/${this.page}/${this.searchQuery}`)
             .then(response => response.json())
             .then(data => {
-                this.results += data.data
                 console.log(data.data)
+                this.results += data.data
             })
         },
         onScroll ({ target: { scrollTop, clientHeight, scrollHeight }}) {

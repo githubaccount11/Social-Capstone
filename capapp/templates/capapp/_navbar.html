@@ -7,7 +7,7 @@
         {% if not request.user.is_anonymous %}
             <a href="{% url 'logout' %}">logout</a>
             <a href="{% url 'profile' request.user.id %}">profile</a>
-            {% comment %} <a href="{% url 'search' %}">search</a> {% endcomment %}
+            <a href="{% url 'search' %}">search</a>
         {% else %}
             <a href="{% url 'register' %}">register</a>
             <a href="{% url 'login' %}">login</a>

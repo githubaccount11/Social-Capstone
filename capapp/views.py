@@ -69,7 +69,6 @@ def profile(request, user_id):
         return redirect('login')
     user = get_object_or_404(User, id=user_id)
     profile = get_object_or_404(Profile, user=user)
-    # images = profile.images.all()
     if user != request.user:
         if not profile.display_age:
             profile.age = ""
@@ -97,8 +96,7 @@ def profile(request, user_id):
             profile.following.set([])
     context = {
         "user" : user,
-        "profile": profile,
-        # "images": images
+        "profile": profile
     }
     return render(request, 'capapp/profile.html', context)
 
@@ -184,10 +182,15 @@ def logout(request):
     auth.logout(request)
     return redirect('login')
 
-def search(request, page, search_query):
-    users = User.objects.filter(Q(username__contains=search_query) | Q(first_name__contains=search_query) | Q(last_name__contains=search_query))[page*30:(page+1)*30]
-    for index, user in users:
-        if user.username == request.user.username:
-            users.pop(index)
+def search(request):
+    return render(request, 'capapp/search.html')
+
+def search_run(request, page, search_query):
+    users = User.objects.filter(Q(username__icontains=search_query) | Q(first_name__icontains=search_query) | Q(last_name__icontains=search_query))[page*30:(page+1)*30]
+    print(users)
+    for index in range(len(list(users.values()))):
+        if list(users.values())[index]["username"] == request.user.username:
+            list(users.values()).pop(index)
     results = list(users.values("first_name", "last_name", "id", "user_profile__profile_image"))
+    print(results)
     return JsonResponse({"data": results})

@@ -1,14 +1,20 @@
 {% extends 'capapp/base.html' %}
+{% block load %}
+{% load static %}
+{% endblock load %}
+{% block header %}
+<script src="https://unpkg.com/vue@3"></script>
+<script defer src="{% static 'capapp/search.js' %}"></script>
+{% endblock header %}
 {% block title %}Search{% endblock title %}
 {% block content %}
     <div @scroll="onScroll">
-        <form action="{% url 'search' %}" method="POST">
-            {% csrf_token %}
-            <select  >
-            <input v-model="searchQuery" v-on:change="startSearch()" name="search_input" type="text" placeholder="Search for someone:">
-            <button>Search</button>
-        </form>
-        <div v-for="result in results">
+        <div id="app">
+            <input v-model="searchQuery" v-on:change="startSearch()" type="text" placeholder="Search for someone:">
+            <button v-on:click="startSearch()">Search</button>
+            <div v-for="result in results">
+                <p>1</p>
+            </div>
         </div>
     </div>
 {% endblock content %}
