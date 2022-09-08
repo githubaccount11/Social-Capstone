@@ -8,13 +8,15 @@
 {% endblock header %}
 {% block title %}Search{% endblock title %}
 {% block content %}
-    <div @scroll="onScroll">
-        <div id="app">
-            <input v-model="searchQuery" v-on:change="startSearch()" type="text" placeholder="Search for someone:">
-            <button v-on:click="startSearch()">Search</button>
-            <div v-for="result in results">
-                <p>1</p>
-            </div>
+    <div id="app">
+        {% comment %} <div @scroll="onScroll"> {% endcomment %}
+        <input v-model="searchQuery" v-on:input="startSearch()" type="text" placeholder="Search for someone:">
+        <button v-on:click="startSearch()">Search</button>
+        <div v-for="result in results">
+            <a  v-bind:href="'/profile/' + result.id"><img v-bind:src="result.user_profile__profile_image" v-bind:alt="'profile image of ' + result.firt_name + result.last_name"></a>
+            <a  v-bind:href="'/profile/' + result.id"><span>[[result.first_name]] [[result.last_name]]</span></a>
         </div>
+        <button v-on:click="loadMore()">Load More</button>
+        {% comment %} </div> {% endcomment %}
     </div>
 {% endblock content %}

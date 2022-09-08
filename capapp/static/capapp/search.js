@@ -18,15 +18,20 @@ const app = Vue.createApp({
             .then(response => response.json())
             .then(data => {
                 console.log(data.data)
-                this.results += data.data
+                this.results.push(...data.data)
+                console.log(this.results)
             })
         },
-        onScroll ({ target: { scrollTop, clientHeight, scrollHeight }}) {
-            if (scrollTop + clientHeight >= scrollHeight) {
-              this.page++
-              this.search()
-            }
-          }
+        loadMore: function() {
+            this.page++
+            this.search()
+        }
+        // onScroll ({ target: { scrollTop, clientHeight, scrollHeight }}) {
+        //     if (scrollTop + clientHeight >= scrollHeight) {
+        //       this.page++
+        //       this.search()
+        //     }
+        //   }
     },
     watch: {
       locations: function(locations){

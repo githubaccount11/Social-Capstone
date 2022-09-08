@@ -94,9 +94,15 @@ def profile(request, user_id):
             profile.followers.set([])
         if not profile.display_following:
             profile.following.set([])
+    if profile.friends.filter(user=request.user):
+        friend = True
+    if profile.followers.filter(user=request.user):
+        follower = True
     context = {
         "user" : user,
-        "profile": profile
+        "profile": profile,
+        "friend": friend,
+        "follower": follower
     }
     return render(request, 'capapp/profile.html', context)
 
@@ -188,6 +194,7 @@ def search(request):
 def search_run(request, page, search_query):
     users = User.objects.filter(Q(username__icontains=search_query) | Q(first_name__icontains=search_query) | Q(last_name__icontains=search_query))[page*30:(page+1)*30]
     print(users)
+    # users = users.exclude(username=request.user.username)
     for index in range(len(list(users.values()))):
         if list(users.values())[index]["username"] == request.user.username:
             list(users.values()).pop(index)
