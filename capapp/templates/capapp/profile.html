@@ -10,6 +10,18 @@
     {% for image in profile.images.all %}
     <img src={{image.url}} alt="{{request.user.first_name}} {{request.user.last_name}}'s gallery">
     {% endfor %}
+    {% if user != request.user %}
+    {% if friend %}
+    <a href="{% url 'friend' user.id %}">Unfriend</a>
+    {% else %}
+    <a href="{% url 'friend' user.id %}">Friend</a>
+    {% endif %}
+    {% if follower %}
+    <a href="{% url 'follow' user.id %}">Unfollow</a>
+    {% else %}
+    <a href="{% url 'follow' user.id %}">Follow</a>
+    {% endif %}
+    {% endif %}
     <p>{{profile.age}}</p>
     <p>{{profile.location}}</p>
     <p>{{profile.phone}}</p>

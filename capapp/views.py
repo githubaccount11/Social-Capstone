@@ -94,9 +94,11 @@ def profile(request, user_id):
             profile.followers.set([])
         if not profile.display_following:
             profile.following.set([])
-    if profile.friends.filter(user=request.user):
+    friend = False
+    follower = False
+    if profile.friends.filter(id=request.user.id):
         friend = True
-    if profile.followers.filter(user=request.user):
+    if profile.followers.filter(id=request.user.id):
         follower = True
     context = {
         "user" : user,
@@ -201,3 +203,25 @@ def search_run(request, page, search_query):
     results = list(users.values("first_name", "last_name", "id", "user_profile__profile_image"))
     print(results)
     return JsonResponse({"data": results})
+
+def friend(request, user_id):
+    profile = Profile.objects.filter(user=request.user)[0]
+    friend = profile.friends.filter(id=user_id)
+    if friend:
+        profile.friends.remove(friend)
+        
+    else:
+        profile.friends.add(User.objects.filter(id=request.user.id)[0])
+        request.user.user_profile.get().friends.add(User.objects.filter(id=user_id)[0])
+    profile.save()
+    request.user.user_profile.save()
+    return redirect(f'../profile/{user_id}')
+
+def follow(request, user_id):
+    profile = Profile.objects.filter(user=request.user)[0]
+    follower = profile.followers.filter(id=user_id)
+    if follower:
+        follower.delete()
+    else:
+        profile.followers.add(User.objects.filter(id=request.user.id)[0])
+    return redirect(f'../profile/{user_id}')
