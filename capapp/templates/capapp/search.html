@@ -1,0 +1,14 @@
+{% extends 'capapp/base.html' %}
+{% block title %}Search{% endblock title %}
+{% block content %}
+    <div @scroll="onScroll">
+        <form action="{% url 'search' %}" method="POST">
+            {% csrf_token %}
+            <select  >
+            <input v-model="searchQuery" v-on:change="startSearch()" name="search_input" type="text" placeholder="Search for someone:">
+            <button>Search</button>
+        </form>
+        <div v-for="result in results">
+        </div>
+    </div>
+{% endblock content %}

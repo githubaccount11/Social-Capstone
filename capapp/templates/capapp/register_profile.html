@@ -1,0 +1,86 @@
+{% extends 'capapp/base.html' %}
+{% block load %}
+{% load static %}
+{% endblock load %}
+{% block header %}
+<script defer src="{% static 'capapp/location.js' %}"></script>
+{% endblock header %}
+{% block title %}Register Profile{% endblock title %}
+{% block content %}
+    <h1>Register Profile</h1>
+    <p>{{request.user.username}}</p>
+    <form action="{% url 'register_profile' %}" method="POST">
+        {% csrf_token %}
+        <div>
+            <span>Profile Image:</span>
+            {{form.profile_image}}
+        </div>
+        <div>
+            <span>Age:</span>
+            {{form.age}}
+            <span>Display Age:</span>
+            {{form.display_age}}
+        </div>
+        {{form.lat.as_hidden}}
+        {{form.long.as_hidden}}
+        <div>
+            <span>Location:</span>
+            {{form.location}}
+            <span>Display Location:</span>
+            {{form.display_location}}
+        </div>
+        <div>
+            <span>Phone:</span>
+            {{form.phone}}
+            <span>Display Phone:</span>
+            {{form.display_phone}}
+        </div>
+        <div>
+            <span>Email:</span>
+            {{form.email}}
+            <span>Display Email:</span>
+            {{form.display_email}}
+        </div>
+        <div>
+            <span>Gender:</span>
+            {{form.gender}}
+            <span>Display Gender:</span>
+            {{form.display_gender}}
+        </div>
+        <div>
+            <span>Work:</span>
+            {{form.work}}
+            <span>Display Work:</span>
+            {{form.display_work}}
+        </div>
+        <div>
+            <span>Education:</span>
+            {{form.education}}
+            <span>Display Education:</span>
+            {{form.display_education}}
+        </div>
+        <div>
+            <span>Birthday:</span>
+            {{form.birthday}}
+            <span>Display Birthday:</span>
+            {{form.display_birthday}}
+        </div>
+        <div>
+            <span>Display Date Joined:</span>
+            {{form.display_date_joined}}
+        </div>
+        <div>
+            <span>Display Friends:</span>
+            {{form.display_friends}}
+        </div>
+        <div>
+            <span>Display Followers:</span>
+            {{form.display_followers}}
+        </div>
+        <div>
+            <span>Display Following:</span>
+            {{form.display_following}}
+        </div>
+        <button>Register</button>
+    </form>
+{% endblock content %}

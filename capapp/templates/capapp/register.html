@@ -1,0 +1,6 @@
+{% extends 'capapp/base.html' %}
+{% block title %}Register{% endblock title %}
+{% block content %}
+    <h1>Register</h1>
+    {% include 'capapp/_form.html' with path='register' button='Register' %}
+{% endblock content %}

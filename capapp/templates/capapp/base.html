@@ -1,0 +1,17 @@
+{% block load %}
+
+{% endblock load %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block header %}{% endblock header %}
+    <title>{% block title %}Capstone Social{% endblock title %}</title>
+</head>
+<body>
+    {% include 'capapp/_navbar.html' %}
+    {% block content  %}Something went wrong...{% endblock content  %}
+</body>
+</html>

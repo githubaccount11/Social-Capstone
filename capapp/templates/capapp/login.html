@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+{% extends 'capapp/base.html' %}
+{% block title %}Login{% endblock title %}
+{% block content %}
+    <h1>Login</h1>
+    <form action="{% url 'login' %}" method="POST">
+        {% csrf_token %}
+        {{form.username}}
+        {{form.password}}
+        <button>Login</button>
+    </form>
+{% endblock content %}

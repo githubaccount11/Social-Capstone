@@ -22,12 +22,19 @@ At the top of each page is the ability to search for people and at the bottom is
 User:
 - username
 - password
+- first_name
+- last_name
+
+Images:
+- Url
 
 Profile:
-- name
+- user
 - profile image
+- images
 - age
-- location
+- lat
+- long
 - phone number
 - email
 - gender
@@ -38,8 +45,10 @@ Profile:
 - friends
 - followed
 - following
+- boolean display field for all fields except image fields
 
 Post:
+- user
 - public
 - private
 - name
@@ -52,6 +61,7 @@ Post:
 - comments
 
 Comments:
+- user
 - name
 - text content
 - date posted
@@ -67,4 +77,7 @@ Milestone 2:
 - complete profile, posting (except maybe video posts), user search, and basic chat
 
 Milestone 3:
-- complete chat, video posting
+- complete chat, video posting, image hosting, blocking, reporting
+
+Milestone 4:
+- privacy policy, TOS, get domain, scale

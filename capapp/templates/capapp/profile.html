@@ -1,0 +1,35 @@
+{% extends 'capapp/base.html' %}
+{% block title %}{{request.user.username}}{% endblock title %}
+{% block content %}
+    {% if user == request.user %}
+        <h4>Hello {{request.user.username}}</h4>
+    {% endif %}
+    
+    <p>{{profile.user.first_name}} {{profile.user.last_name}}</p>
+    <img src={{profile.profile_image}} alt="{{request.user.first_name}} {{request.user.last_name}}'s profile picture">
+    {% for image in profile.images.all %}
+    <img src={{image.url}} alt="{{request.user.first_name}} {{request.user.last_name}}'s gallery">
+    {% endfor %}
+    <p>{{profile.age}}</p>
+    <p>{{profile.location}}</p>
+    <p>{{profile.phone}}</p>
+    <p>{{profile.email}}</p>
+    <p>{{profile.gender}}</p>
+    <p>{{profile.work}}</p>
+    <p>{{profile.education}}</p>
+    <p>{{profile.birthday}}</p>
+    <p>{{profile.date_joined}}</p>
+    {% for friend in friends.all %}
+        {{friend.user_profile.profile_image}}
+    {% endfor %}
+    {% for follower in followers.all %}
+        {{followee.user_profile.profile_image}}
+    {% endfor %}
+    {% for followee in folowing.all %}
+        {{friend.user_profile.profile_image}}
+    {% endfor %}
+
+    {% if user == request.user %}
+        <a href={% url 'edit_profile' %}>edit profile</a>
+    {% endif %}
+{% endblock content %}
