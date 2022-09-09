@@ -19,8 +19,8 @@
     {% endif %}
     {% endif %}
     {% if user == request.user %}
-    {% for potential in profile.unconfirmed %}
-        <a href="{% url 'profile' potential.id %}"><img src={{potential.user_profile.profile_image}} alt="profile image of " + {{potential.first_name}} + " " + {{potential.last_name}}></a>
+    {% for potential in profile.unconfirmed.all %}
+        <a href="{% url 'profile' potential.id %}"><img src={{potential.user_profile.profile_image}} alt="{{potential.first_name}} {{potential.last_name}}'s profile picture"></a>
         <a href="{% url 'profile' potential.id %}"><p>{{potential.first_name}} {{potential.last_name}}</p></a>
     {% endfor %}
     {% endif %}
@@ -33,16 +33,16 @@
     <p>{{profile.education}}</p>
     <p>{{profile.birthday}}</p>
     <p>{{profile.date_joined}}</p>
-    {% for friend in friends.all %}
-        <a href="{% url 'profile' friend.id %}"><img src={{friend.user_profile.profile_image}} alt="profile image of " + {{friend.first_name}} + " " + {{friend.last_name}}></a>
+    {% for friend in profile.friends.all %}
+        <a href="{% url 'profile' friend.id %}"><img src={{friend.user_profile.profile_image}} alt="{{friend.first_name}} {{friend.last_name}}'s profile picture"></a>
         <a href="{% url 'profile' friend.id %}"><p>{{potential.first_name}} {{potential.last_name}}</p></a>
     {% endfor %}
-    {% for follower in followers.all %}
-        <a href="{% url 'profile' follower.id %}"><img src={{follower.user_profile.profile_image}} alt="profile image of " + {{follower.first_name}} + " " + {{follower.last_name}}></a>
+    {% for follower in profile.followers.all %}
+        <a href="{% url 'profile' follower.id %}"><img src={{follower.user_profile.profile_image}} alt="{{follower.first_name}} {{follower.last_name}}'s profile picture"></a>
         <a href="{% url 'profile' follower.id %}"><p>{{potential.first_name}} {{potential.last_name}}</p></a>
     {% endfor %}
-    {% for followee in folowing.all %}
-        <a href="{% url 'profile' followee.id %}"><img src={{followee.user_profile.profile_image}} alt="profile image of " + {{followee.first_name}} + " " + {{followee.last_name}}></a>
+    {% for followee in profile.folowing.all %}
+        <a href="{% url 'profile' followee.id %}"><img src={{followee.user_profile.profile_image}} alt="{{followee.first_name}} {{followee.last_name}}'s profile picture"></a>
         <a href="{% url 'profile' followee.id %}"><p>{{potential.first_name}} {{potential.last_name}}</p></a>
     {% endfor %}
 

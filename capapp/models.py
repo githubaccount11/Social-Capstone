@@ -6,7 +6,7 @@ class Images(models.Model):
     url = models.URLField(max_length=1000)
 
 class Profile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_profile")
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="user_profile")
     profile_image = models.URLField(max_length=1000, blank=True, null=True)
     images = models.ManyToManyField(Images, related_name="image_profile", blank=True)
     age = models.IntegerField(blank=True, null=True)

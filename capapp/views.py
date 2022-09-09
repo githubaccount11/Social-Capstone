@@ -266,9 +266,10 @@ def index(request):
             post.image = form.cleaned_data['image']
             post.video = form.cleaned_data['video']
             post.save()
-        return redirect('../index')
-    feed = Post.objects.filter(Q(user__in=request.user.user_profile.following) & Q(public=True))
-    feed += Post.objects.filter(Q(user__in=request.user.user_profile.friends) & Q(private=True))
+        return redirect('../')
+    feed = list(Post.objects.filter(Q(user__in=request.user.user_profile.following.all()) & Q(public=True)))
+    feed += list(Post.objects.filter(Q(user__in=request.user.user_profile.friends.all()) & Q(private=True)))
+    feed += list(Post.objects.filter(user=request.user))
     feed = feed.sort(key = lambda x:x['date_created'])
     context = {
         'form': NewPost,
