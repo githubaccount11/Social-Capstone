@@ -13,4 +13,5 @@ urlpatterns = [
     path('friend/<int:user_id>', views.friend, name="friend"),
     path('follow/<int:user_id>', views.follow, name="follow"),
     path('edit_profile/', views.edit_profile, name="edit_profile"),
+    path('', views.index, name="index"),
 ]

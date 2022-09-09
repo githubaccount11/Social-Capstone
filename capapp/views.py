@@ -70,6 +70,19 @@ def profile(request, user_id):
     user = get_object_or_404(User, id=user_id)
     profile = get_object_or_404(Profile, user=user)
     if user != request.user:
+        friend = "Friend"
+        follower = False
+        if profile.friends.filter(id=request.user.id):
+            friend = "Unfriend"
+        else:
+            your_profile = Profile.objects.filter(user=request.user)[0]
+            if your_profile.unconfirmed.filter(id=user_id):
+                friend = "Confirm"
+            else:
+                if profile.unconfirmed.filter(id=request.user.id):
+                    friend = "Unsend"
+        if profile.followers.filter(id=request.user.id):
+            follower = True
         if not profile.display_age:
             profile.age = ""
         if not profile.display_location:
@@ -94,18 +107,18 @@ def profile(request, user_id):
             profile.followers.set([])
         if not profile.display_following:
             profile.following.set([])
-    friend = False
-    follower = False
-    if profile.friends.filter(id=request.user.id):
-        friend = True
-    if profile.followers.filter(id=request.user.id):
-        follower = True
-    context = {
-        "user" : user,
-        "profile": profile,
-        "friend": friend,
-        "follower": follower
-    }
+        
+        context = {
+            "user" : user,
+            "profile": profile,
+            "friend": friend,
+            "follower": follower
+        }
+    else:
+        context = {
+            "user" : user,
+            "profile": profile
+        }
     return render(request, 'capapp/profile.html', context)
 
 @login_required
@@ -206,22 +219,59 @@ def search_run(request, page, search_query):
 
 def friend(request, user_id):
     profile = Profile.objects.filter(user=request.user)[0]
+    other_profile = Profile.objects.filter(user__id=user_id)[0]
     friend = profile.friends.filter(id=user_id)
     if friend:
-        profile.friends.remove(friend)
-        
+        profile.friends.remove(friend[0])
+        other_profile.friends.remove(request.user)
     else:
-        profile.friends.add(User.objects.filter(id=request.user.id)[0])
-        request.user.user_profile.get().friends.add(User.objects.filter(id=user_id)[0])
+        unconfirmed = profile.unconfirmed.filter(id=user_id)
+        if unconfirmed:
+            profile.unconfirmed.remove(unconfirmed[0])
+            profile.friends.add(User.objects.filter(id=user_id)[0])
+            other_profile.friends.add(request.user)
+        else:
+            your_unconfirmed = other_profile.unconfirmed.filter(id=request.user.id)
+            if your_unconfirmed:
+                other_profile.unconfirmed.remove(your_unconfirmed[0])
+            else:
+                other_profile.unconfirmed.add(request.user)
     profile.save()
-    request.user.user_profile.save()
+    other_profile.save()
     return redirect(f'../profile/{user_id}')
 
 def follow(request, user_id):
     profile = Profile.objects.filter(user=request.user)[0]
-    follower = profile.followers.filter(id=user_id)
-    if follower:
-        follower.delete()
+    other_profile = Profile.objects.filter(user__id=user_id)[0]
+    followee = profile.following.filter(id=user_id)
+    if followee:
+        profile.following.remove(followee[0])
+        other_profile.followers.remove(request.user)
     else:
-        profile.followers.add(User.objects.filter(id=request.user.id)[0])
+        profile.following.add(User.objects.filter(id=user_id)[0])
+        other_profile.followers.add(request.user)
+    profile.save()
+    other_profile.save()
     return redirect(f'../profile/{user_id}')
+
+def index(request):
+    if request.method == "POST":
+        form = NewPost(request.POST)
+        if form.is_valid():
+            post = Post()
+            post.text_content = form.cleaned_data['text_content']
+            post.user = request.user
+            post.public = form.cleaned_data['public']
+            post.private = form.cleaned_data['private']
+            post.image = form.cleaned_data['image']
+            post.video = form.cleaned_data['video']
+            post.save()
+        return redirect('../index')
+    feed = Post.objects.filter(Q(user__in=request.user.user_profile.following) & Q(public=True))
+    feed += Post.objects.filter(Q(user__in=request.user.user_profile.friends) & Q(private=True))
+    feed = feed.sort(key = lambda x:x['date_created'])
+    context = {
+        'form': NewPost,
+        'feed': feed
+    }
+    return render(request, 'capapp/index.html', context)
