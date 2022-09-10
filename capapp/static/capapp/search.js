@@ -17,9 +17,7 @@ const app = Vue.createApp({
             fetch(`/search/${this.page}/${this.searchQuery}`)
             .then(response => response.json())
             .then(data => {
-                console.log(data.data)
                 this.results.push(...data.data)
-                console.log(this.results)
             })
         },
         loadMore: function() {

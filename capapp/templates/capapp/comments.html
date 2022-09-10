@@ -19,5 +19,5 @@
     {% if post.user == request.user %}
         <a href={% url 'edit_post' post.id %}>Edit</a>
     {% endif %}
-    
+    <div id="comments"></div>
 {% endblock content %}

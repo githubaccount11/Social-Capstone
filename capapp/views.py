@@ -389,3 +389,23 @@ def edit_comment(request, comment_id):
                 comment.save()
             return redirect(f'../comments/{comment.post.id}')
     return redirect(f'../comments/{comment.post.id}')
+
+def get_comments(request, post_id):
+    post = Post.objects.filter(id=post_id)[0]
+    comments = []
+    for comment in post.comments:
+        comments += {
+            'comment': comment.values("text_content", "user__first_name", "user__last_name", "user__id", "date_created", "date_edited"),
+            'subments': get_subments(comment.id)
+        }
+    return JsonResponse({"data": comments})
+
+def get_subments(comment_id):
+    comment = Comments.objects.filter(id=comment_id)[0]
+    comments = []
+    for subment in comment.subments:
+        comments += {
+            'comment': subment.values("text_content", "user__first_name", "user__last_name", "user__id", "date_created", "date_edited"),
+            'subments': get_subments(subment.id)
+        }
+    return comments
