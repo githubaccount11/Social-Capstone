@@ -14,5 +14,9 @@ urlpatterns = [
     path('follow/<int:user_id>', views.follow, name="follow"),
     path('edit_profile/', views.edit_profile, name="edit_profile"),
     path('', views.index, name="index"),
-    path('edit_post/<int:post_id>', views.edit_post, name="edit_post")
+    path('edit_post/<int:post_id>', views.edit_post, name="edit_post"),
+    path('comments/<int:post_id>', views.comments, name="comments"),
+    path('make_comment/<int:post_id>/', views.make_comment, {'comment_id': 0}, name="make_comment"),
+    path('make_comment/<int:post_id>/<int:comment_id>', views.make_comment, name="make_comment"),
+    path('edit_comment/<int:comment_id>', views.edit_comment, name="edit_comment"),
 ]

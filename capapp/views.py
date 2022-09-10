@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import auth
 from django.contrib.auth.models import User
-from .forms import AuthForm, NewPost, ProfileForm
-from .models import Post, Profile
+from .forms import AuthForm, NewPost, ProfileForm, NewComment
+from .models import Post, Profile, Comments
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse
@@ -328,3 +328,64 @@ def edit_post(request, post_id):
                 post.save()
             return redirect(f'../')
     return redirect(f'../')
+
+def comments(request, post_id):
+    post = Post.objects.filter(id=post_id)[0]
+    context = {
+        'post': post
+    }
+    return render(request, 'capapp/comments.html', context)
+
+def make_comment(request, post_id, comment_id):
+    if request.method == "POST":
+        form = NewComment(request.POST)
+        if form.is_valid():
+            comment = Comments()
+            comment.text_content = form.cleaned_data['text_content']
+            comment.user = request.user
+            comment.save()
+        return redirect('comments', post_id=post_id)
+    post = Post.objects.filter(id=post_id)[0]
+    if comment_id != 0:
+        comment = Comments.objects.filter(id=comment_id)
+        if comment:
+            context = {
+                'post': post,
+                'comment': comment[0],
+                'form': NewComment
+            }
+    else:
+        context = {
+            'comment': False,
+            'post': post,
+            'form': NewComment
+        }
+    return render(request, 'capapp/make_comment.html', context)
+
+def edit_comment(request, comment_id):
+    if request.method == "GET":
+        try:
+            comment = Comments.objects.get(id=comment_id)
+        except comment.DoesNotExist:
+            return redirect(f'../')
+        if request.user == comment.user:
+            context = {
+                "post": comment,
+                "form": NewComment({
+                    "text_content": comment.text_content})
+            }
+            return render(request, 'capapp/edit_comment.html', context)
+        else:
+            return redirect(f'../comments/{comment.post.id}')
+    elif request.method == "POST":
+        try:
+            comment = Comments.objects.get(id=comment_id)
+        except Post.DoesNotExist:
+            return redirect(f'../comments/{comment.post.id}')
+        if request.user == comment.user:
+            form = NewPost(request.POST)
+            if form.is_valid():
+                comment.text_content = form.cleaned_data['text_content']
+                comment.save()
+            return redirect(f'../comments/{comment.post.id}')
+    return redirect(f'../comments/{comment.post.id}')

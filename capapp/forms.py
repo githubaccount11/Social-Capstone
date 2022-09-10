@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import Post, Profile
+from .models import Comments, Post, Profile
 from datetime import date
 
 class AuthForm(forms.Form):
@@ -39,3 +39,8 @@ class NewPost(ModelForm):
     class Meta:
         model = Post
         fields = ['public', 'private', 'text_content', 'image', 'video']
+
+class NewComment(ModelForm):
+    class Meta:
+        model = Comments
+        fields = ['text_content']

@@ -1,0 +1,35 @@
+{% extends 'capapp/base.html' %}
+{% block title %}Make Comment{% endblock title %}
+{% block content %}
+    {% if comment %}
+        <a href="{% url 'profile' comment.user.id %}"><img src={{comment.user.user_profile.profile_image}} alt="{{comment.user.first_name}} {{comment.user.last_name}}'s profile picture"></a>
+        <a href="{% url 'profile' comment.user.id %}">{{comment.user.first_name}} {{comment.user.last_name}}</a>
+        <span>Created: {{comment.date_created}}</span>
+        <span>Edited: {{comment.date_edited}}</span>
+        <p>{{comment.text_content}}</p>
+        {% if comment.user == request.user %}
+            <a href={% url 'edit_comment' comment.id %}>Edit</a>
+        {% endif %}
+        <form action="{% url 'make_comment' post.id comment.id %}" method="POST">
+            {% csrf_token %}
+            {{form.as_p}}
+            <button>Comment</button>
+    {% else %}
+        <a href="{% url 'profile' post.user.id %}"><img src={{post.user.user_profile.profile_image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s profile picture"></a>
+        <a href="{% url 'profile' post.user.id %}">{{post.user.first_name}} {{post.user.last_name}}</a>
+        <span>Created: {{post.date_created}}</span>
+        <span>Edited: {{post.date_edited}}</span>
+        {% if post.image %}
+            <img src={{post.image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s post">
+        {% endif %}
+        <p>{{post.text_content}}</p>
+        {% if post.user == request.user %}
+            <a href={% url 'edit_post' post.id %}>Edit</a>
+        {% endif %}
+        <form action="{% url 'make_comment' post.id %}" method="POST">
+            {% csrf_token %}
+            {{form.as_p}}
+            <button>Comment</button>
+    {% endif %}
+    </form>
+{% endblock content %}

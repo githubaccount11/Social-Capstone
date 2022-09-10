@@ -50,11 +50,11 @@
     <a href="{% url 'profile' post.user.id %}">{{post.user.first_name}} {{post.user.last_name}}</a>
     <span>Created: {{post.date_created}}</span>
     <span>Edited: {{post.date_edited}}</span>
-    {% if post.image != "" %}
+    {% if post.image %}
         <img src={{post.image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s post">
     {% endif %}
-        p>{{post.text_content}}</p>
-        <a href="">Comments</a>
+        <p>{{post.text_content}}</p>
+        <a href={% url 'comments' post.id %}>Comments</a>
     {% if post.user == request.user %}
         <a href={% url 'edit_post' post.id %}>Edit</a>
     {% endif %}
