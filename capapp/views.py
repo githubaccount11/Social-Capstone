@@ -65,10 +65,21 @@ def saveForm(profile, form):
 
 @login_required
 def profile(request, user_id):
-    if request.user.is_anonymous:
-        return redirect('login')
     user = get_object_or_404(User, id=user_id)
     profile = get_object_or_404(Profile, user=user)
+    
+    feed = []
+    if user == request.user:
+        feed = list(Post.objects.filter(user=request.user))
+    else:
+        friend = profile.friends.filter(id=request.user.id)
+        if friend:
+            feed = list(Post.objects.filter(Q(user=user) & Q(public=True)))
+        follower = profile.followers.filter(id=request.user.id)
+        if follower:
+            feed += list(Post.objects.filter(Q(user=user) & Q(private=True)))
+    feed.sort(key = lambda x:x.date_created)
+
     if user != request.user:
         friend = "Friend"
         follower = False
@@ -116,15 +127,14 @@ def profile(request, user_id):
         }
     else:
         context = {
-            "user" : user,
+            "feed": feed,
+            "user": user,
             "profile": profile
         }
     return render(request, 'capapp/profile.html', context)
 
 @login_required
 def edit_profile(request):
-    if request.user.is_anonymous:
-        return redirect('../login')
     if request.method == "GET":
         try:
             profile = Profile.objects.get(user=request.user)
@@ -222,19 +232,23 @@ def friend(request, user_id):
     other_profile = Profile.objects.filter(user__id=user_id)[0]
     friend = profile.friends.filter(id=user_id)
     if friend:
+        #if friends then remove friendship
         profile.friends.remove(friend[0])
         other_profile.friends.remove(request.user)
     else:
         unconfirmed = profile.unconfirmed.filter(id=user_id)
         if unconfirmed:
+            #if you haven't confirmed then remove confirm and add friends
             profile.unconfirmed.remove(unconfirmed[0])
             profile.friends.add(User.objects.filter(id=user_id)[0])
             other_profile.friends.add(request.user)
         else:
             your_unconfirmed = other_profile.unconfirmed.filter(id=request.user.id)
             if your_unconfirmed:
+                #if they haven't confirmed then remove request
                 other_profile.unconfirmed.remove(your_unconfirmed[0])
             else:
+                #if neither friends nor confirmed send confirmation request
                 other_profile.unconfirmed.add(request.user)
     profile.save()
     other_profile.save()
@@ -254,6 +268,7 @@ def follow(request, user_id):
     other_profile.save()
     return redirect(f'../profile/{user_id}')
 
+@login_required
 def index(request):
     if request.method == "POST":
         form = NewPost(request.POST)
@@ -270,9 +285,46 @@ def index(request):
     feed = list(Post.objects.filter(Q(user__in=request.user.user_profile.following.all()) & Q(public=True)))
     feed += list(Post.objects.filter(Q(user__in=request.user.user_profile.friends.all()) & Q(private=True)))
     feed += list(Post.objects.filter(user=request.user))
-    feed = feed.sort(key = lambda x:x['date_created'])
+    feed.sort(key = lambda x:x.date_created)
     context = {
         'form': NewPost,
         'feed': feed
     }
     return render(request, 'capapp/index.html', context)
+
+@login_required
+def edit_post(request, post_id):
+    if request.method == "GET":
+        try:
+            post = Post.objects.get(id=post_id)
+        except post.DoesNotExist:
+            return redirect(f'../')
+        if request.user == post.user:
+            context = {
+                "post": post,
+                "form": NewPost({
+                    "public": post.public,
+                    "private": post.private,
+                    "text_content": post.text_content,
+                    "image": post.image,
+                    "video": post.video})
+            }
+            return render(request, 'capapp/edit_post.html', context)
+        else:
+            return redirect(f'../')
+    elif request.method == "POST":
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return redirect(f'../')
+        if request.user == post.user:
+            form = NewPost(request.POST)
+            if form.is_valid():
+                post.public = form.cleaned_data['public']
+                post.private = form.cleaned_data['private']
+                post.text_content = form.cleaned_data['text_content']
+                post.image = form.cleaned_data['image']
+                post.video = form.cleaned_data['video']
+                post.save()
+            return redirect(f'../')
+    return redirect(f'../')

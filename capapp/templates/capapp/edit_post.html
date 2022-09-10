@@ -1,7 +1,7 @@
 {% extends 'capapp/base.html' %}
-{% block title %}Edit Profile{% endblock title %}
+{% block title %}Edit Post{% endblock title %}
 {% block content %}
-    <form action="{% url 'edit_profile' %}" method="POST">
+    <form action="{% url 'edit_post' post.id %}" method="POST">
         {% csrf_token %}
         {{form.as_p}}
         <button>Save Edit</button>
