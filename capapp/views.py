@@ -86,7 +86,7 @@ def profile(request, user_id):
         if profile.friends.filter(id=request.user.id):
             friend = "Unfriend"
         else:
-            your_profile = Profile.objects.filter(user=request.user)[0]
+            your_profile = Profile.objects.get(user=request.user)
             if your_profile.unconfirmed.filter(id=user_id):
                 friend = "Confirm"
             else:
@@ -228,8 +228,8 @@ def search_run(request, page, search_query):
     return JsonResponse({"data": results})
 
 def friend(request, user_id):
-    profile = Profile.objects.filter(user=request.user)[0]
-    other_profile = Profile.objects.filter(user__id=user_id)[0]
+    profile = Profile.objects.get(user=request.user)
+    other_profile = Profile.objects.get(user__id=user_id)
     friend = profile.friends.filter(id=user_id)
     if friend:
         #if friends then remove friendship
@@ -240,7 +240,7 @@ def friend(request, user_id):
         if unconfirmed:
             #if you haven't confirmed then remove confirm and add friends
             profile.unconfirmed.remove(unconfirmed[0])
-            profile.friends.add(User.objects.filter(id=user_id)[0])
+            profile.friends.add(User.objects.get(id=user_id))
             other_profile.friends.add(request.user)
         else:
             your_unconfirmed = other_profile.unconfirmed.filter(id=request.user.id)
@@ -262,7 +262,7 @@ def follow(request, user_id):
         profile.following.remove(followee[0])
         other_profile.followers.remove(request.user)
     else:
-        profile.following.add(User.objects.filter(id=user_id)[0])
+        profile.following.add(User.objects.get(id=user_id))
         other_profile.followers.add(request.user)
     profile.save()
     other_profile.save()
@@ -330,22 +330,25 @@ def edit_post(request, post_id):
     return redirect(f'../')
 
 def comments(request, post_id):
-    post = Post.objects.filter(id=post_id)[0]
+    post = Post.objects.get(id=post_id)
     context = {
         'post': post
     }
     return render(request, 'capapp/comments.html', context)
 
 def make_comment(request, post_id, comment_id):
+    post = Post.objects.get(id=post_id)
     if request.method == "POST":
         form = NewComment(request.POST)
         if form.is_valid():
             comment = Comments()
             comment.text_content = form.cleaned_data['text_content']
             comment.user = request.user
+            comment.post = post
+            if comment_id != 0:
+                comment.parentment = Comments.objects.get(id=comment_id)
             comment.save()
         return redirect('comments', post_id=post_id)
-    post = Post.objects.filter(id=post_id)[0]
     if comment_id != 0:
         comment = Comments.objects.filter(id=comment_id)
         if comment:
@@ -370,7 +373,7 @@ def edit_comment(request, comment_id):
             return redirect(f'../')
         if request.user == comment.user:
             context = {
-                "post": comment,
+                "comment": comment,
                 "form": NewComment({
                     "text_content": comment.text_content})
             }
@@ -391,21 +394,23 @@ def edit_comment(request, comment_id):
     return redirect(f'../comments/{comment.post.id}')
 
 def get_comments(request, post_id):
-    post = Post.objects.filter(id=post_id)[0]
+    post = Post.objects.get(id=post_id)
     comments = []
-    for comment in post.comments:
-        comments += {
-            'comment': comment.values("text_content", "user__first_name", "user__last_name", "user__id", "date_created", "date_edited"),
+    # print(post.comments.all())
+    for comment in post.comments.all():
+        comments.append({
+            'comment': {"id": comment.id, "post_id": comment.post.id, "text_content": comment.text_content, "user__first_name": comment.user.first_name, "user__last_name": comment.user.last_name, "user__id": comment.user.id, "date_created": comment.date_created, "date_edited": comment.date_edited},
             'subments': get_subments(comment.id)
-        }
+        })
+    print(comments)
     return JsonResponse({"data": comments})
 
 def get_subments(comment_id):
-    comment = Comments.objects.filter(id=comment_id)[0]
+    comment = Comments.objects.get(id=comment_id)
     comments = []
-    for subment in comment.subments:
-        comments += {
-            'comment': subment.values("text_content", "user__first_name", "user__last_name", "user__id", "date_created", "date_edited"),
+    for subment in comment.subments.all():
+        comments.append({
+            'comment': {"id": subment.id, "post_id": subment.post.id, "text_content": subment.text_content, "user__first_name": subment.user.first_name, "user__last_name": subment.user.last_name, "user__id": subment.user.id, "date_created": subment.date_created, "date_edited": subment.date_edited},
             'subments': get_subments(subment.id)
-        }
+        })
     return comments

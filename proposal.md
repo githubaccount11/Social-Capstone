@@ -80,4 +80,4 @@ Milestone 3:
 - complete chat, video posting, image hosting, blocking, reporting
 
 Milestone 4:
-- privacy policy, TOS, get domain, scale
+- privacy policy, TOS, get domain, scale, dark mode

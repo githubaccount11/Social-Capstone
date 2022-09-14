@@ -37,13 +37,6 @@ class Profile(models.Model):
     following = models.ManyToManyField(User, related_name="following_profile", blank=True)
     display_following = models.BooleanField(default=False)
     
-class Comments(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_comment")
-    text_content = models.CharField(max_length=1000, blank=True, null=True)
-    date_created = models.DateTimeField(auto_now_add=True)
-    date_edited = models.DateTimeField(auto_now=True)
-    subments = models.ForeignKey('self', on_delete=models.PROTECT, blank=True, null=True)
-
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_post")
     public = models.BooleanField()
@@ -53,4 +46,13 @@ class Post(models.Model):
     video = models.URLField(max_length=1000, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_edited = models.DateTimeField(auto_now=True)
-    comments = models.ForeignKey(Comments, on_delete=models.PROTECT, related_name="Post", blank=True, null=True)
+    
+class Comments(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_comment")
+    text_content = models.CharField(max_length=1000, blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_edited = models.DateTimeField(auto_now=True)
+    parentment = models.ForeignKey('self', on_delete=models.CASCADE, related_name="subments", blank=True, null=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+
+    

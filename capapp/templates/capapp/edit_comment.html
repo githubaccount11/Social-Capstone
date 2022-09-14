@@ -1,0 +1,9 @@
+{% extends 'capapp/base.html' %}
+{% block title %}Edit Comment{% endblock title %}
+{% block content %}
+    <form action="{% url 'edit_comment' comment.id %}" method="POST">
+        {% csrf_token %}
+        {{form.as_p}}
+        <button>Save Edit</button>
+    </form>
+{% endblock content %}
