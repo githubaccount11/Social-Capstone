@@ -4,7 +4,8 @@ const app = Vue.createApp({
       return {
         results: [],
         searchQuery: null,
-        page: 0
+        page: 0,
+        display: "hidden"
       }
     },
     methods: {
@@ -14,6 +15,7 @@ const app = Vue.createApp({
           this.search()
         },
         search: function() {
+            this.display = "block"
             fetch(`/search/${this.page}/${this.searchQuery}`)
             .then(response => response.json())
             .then(data => {

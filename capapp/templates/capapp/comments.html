@@ -3,44 +3,32 @@
 {% load static %}
 {% endblock load %}
 {% block header %}
-<link rel="stylesheet" href="{% static 'capapp/comments.css' %}">
 <script>
     const post = {{post.id}};
-    const user_id = {{request.user.id}}
 </script>
 <script defer src="{% static 'capapp/comments.js' %}"></script>
-<script src="https://cdn.tailwindcss.com"></script>
 {% endblock header %}
 {% block title %}Comments{% endblock title %}
 {% block content %}
-<p class="md:space-x-1 space-y-1 md:space-y-0 mb-4">
-    <a class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
-      Link with href
-    </a>
-    <button class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-      Button with data-bs-target
-    </button>
-  </p>
-  <div class="collapse" id="collapseExample">
-    <div class="block p-6 rounded-lg shadow-lg bg-white">
-      Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
-    </div>
-  </div>
-    <div id="post">
-        <div id="post-head">
-            <a href="{% url 'profile' post.user.id %}"><img src={{post.user.user_profile.profile_image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s profile picture"></a>
-            <a href="{% url 'profile' post.user.id %}">{{post.user.first_name}} {{post.user.last_name}}</a>
-            <span>Created: {{post.date_created}}</span>
-            <span>Edited: {{post.date_edited}}</span>
+    <figure class="bg-slate-50 rounded-xl p-4 m-2">
+        <div class="pt-6 space-y-4" id="post">
+            <div class="flex" id="post-head">
+                <a class="px-6" href="{% url 'profile' post.user.id %}"><img class=" border w-24 h-24 rounded-full" src={{post.user.user_profile.profile_image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s profile picture"></a>
+                <div class="text-left">
+                    <a class="pr-3" href="{% url 'profile' post.user.id %}">{{post.user.first_name}} {{post.user.last_name}}</a>
+                    <span class="px-3">Created: {{post.date_created}}</span>
+                    <span class="px-3">Edited: {{post.date_edited}}</span>
+                    {% if post.image %}
+                        <img src={{post.image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s post">
+                    {% endif %}
+                    <p class="text-lg font-medium">{{post.text_content}}</p>
+                </div>
+            </div>
+            <a class="inline-block px-6 py-2.5 bg-sky-200 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-sky-300 hover:shadow-lg focus:bg-sky-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-sky-400 active:shadow-lg transition duration-150 ease-in-out" href={% url 'make_comment' post.id %}>Comment</a>
+            {% if post.user == request.user %}
+                <a href={% url 'edit_post' post.id %}>Edit</a>
+            {% endif %}
         </div>
-        {% if post.image %}
-            <img src={{post.image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s post">
-        {% endif %}
-        <p>{{post.text_content}}</p>
-        <a href={% url 'make_comment' post.id %}>Comment</a>
-        {% if post.user == request.user %}
-            <a href={% url 'edit_post' post.id %}>Edit</a>
-        {% endif %}
-    </div>
+    </figure>
     <div id="comments"></div>
 {% endblock content %}

@@ -6,58 +6,76 @@
     {% endif %}
     
     <p>{{profile.user.first_name}} {{profile.user.last_name}}</p>
-    <img src={{profile.profile_image}} alt="{{request.user.first_name}} {{request.user.last_name}}'s profile picture">
-    {% for image in profile.images.all %}
-    <img src={{image.url}} alt="{{request.user.first_name}} {{request.user.last_name}}'s gallery">
-    {% endfor %}
-    {% if user != request.user %}
-    <a href="{% url 'friend' user.id %}">{{friend}}</a>
-    {% if follower %}
-    <a href="{% url 'follow' user.id %}">Unfollow</a>
-    {% else %}
-    <a href="{% url 'follow' user.id %}">Follow</a>
-    {% endif %}
-    {% endif %}
-    {% if user == request.user %}
-    {% for potential in profile.unconfirmed.all %}
-        <a href="{% url 'profile' potential.id %}"><img src={{potential.user_profile.profile_image}} alt="{{potential.first_name}} {{potential.last_name}}'s profile picture"></a>
-        <a href="{% url 'profile' potential.id %}"><p>{{potential.first_name}} {{potential.last_name}}</p></a>
-    {% endfor %}
-    {% endif %}
-    <p>{{profile.age}}</p>
-    <p>{{profile.location}}</p>
-    <p>{{profile.phone}}</p>
-    <p>{{profile.email}}</p>
-    <p>{{profile.gender}}</p>
-    <p>{{profile.work}}</p>
-    <p>{{profile.education}}</p>
-    <p>{{profile.birthday}}</p>
-    <p>{{profile.date_joined}}</p>
+    <div class="flex" id="post-head">
+        <img class="m-3 border w-50 h-50 rounded-full" src={{profile.profile_image}} alt="{{request.user.first_name}} {{request.user.last_name}}'s profile picture">
+        {% for image in profile.images.all %}
+        <img src={{image.url}} alt="{{request.user.first_name}} {{request.user.last_name}}'s gallery">
+        {% endfor %}
+        {% if user != request.user %}
+        <a href="{% url 'friend' user.id %}">{{friend}}</a>
+        {% if follower %}
+        <a href="{% url 'follow' user.id %}">Unfollow</a>
+        {% else %}
+        <a href="{% url 'follow' user.id %}">Follow</a>
+        {% endif %}
+        {% endif %}
+        {% if user == request.user %}
+        {% for potential in profile.unconfirmed.all %}
+            <a href="{% url 'profile' potential.id %}"><img src={{potential.user_profile.profile_image}} alt="{{potential.first_name}} {{potential.last_name}}'s profile picture"></a>
+            <a href="{% url 'profile' potential.id %}"><p>{{potential.first_name}} {{potential.last_name}}</p></a>
+        {% endfor %}
+        {% endif %}
+        <div>
+            <p>age: {{profile.age}}</p>
+            <p>location: {{profile.location}}</p>
+            <p>phone: {{profile.phone}}</p>
+            <p>email: {{profile.email}}</p>
+            <p>gender: {{profile.gender}}</p>
+            <p>work: {{profile.work}}</p>
+            <p>education: {{profile.education}}</p>
+            <p>birthday: {{profile.birthday}}</p>
+            <p>date joined: {{profile.date_joined}}</p>
+        </div>
+    </div>
+    <p>friends:</p>
     {% for friend in profile.friends.all %}
         <a href="{% url 'profile' friend.id %}"><img src={{friend.user_profile.profile_image}} alt="{{friend.first_name}} {{friend.last_name}}'s profile picture"></a>
         <a href="{% url 'profile' friend.id %}"><p>{{potential.first_name}} {{potential.last_name}}</p></a>
     {% endfor %}
+    <p>followers:</p>
     {% for follower in profile.followers.all %}
         <a href="{% url 'profile' follower.id %}"><img src={{follower.user_profile.profile_image}} alt="{{follower.first_name}} {{follower.last_name}}'s profile picture"></a>
         <a href="{% url 'profile' follower.id %}"><p>{{potential.first_name}} {{potential.last_name}}</p></a>
     {% endfor %}
+    <p>following:</p>
     {% for followee in profile.folowing.all %}
         <a href="{% url 'profile' followee.id %}"><img src={{followee.user_profile.profile_image}} alt="{{followee.first_name}} {{followee.last_name}}'s profile picture"></a>
         <a href="{% url 'profile' followee.id %}"><p>{{potential.first_name}} {{potential.last_name}}</p></a>
     {% endfor %}
+    <div class="text-center">
+        <p>Your posts:</p>
+    </div>
     {% for post in feed %}
-    <a href="{% url 'profile' post.user.id %}"><img src={{post.user.user_profile.profile_image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s profile picture"></a>
-    <a href="{% url 'profile' post.user.id %}">{{post.user.first_name}} {{post.user.last_name}}</a>
-    <span>Created: {{post.date_created}}</span>
-    <span>Edited: {{post.date_edited}}</span>
-    {% if post.image %}
-        <img src={{post.image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s post">
-    {% endif %}
-        <p>{{post.text_content}}</p>
-        <a href={% url 'comments' post.id %}>Comments</a>
-    {% if post.user == request.user %}
-        <a href={% url 'edit_post' post.id %}>Edit</a>
-    {% endif %}
+        <figure class="bg-slate-50 rounded-xl p-4 m-2">
+            <div class="space-y-4" id="post">
+                <div class="flex" id="post-head">
+                    <a href="{% url 'profile' post.user.id %}"><img class=" border w-24 h-24 rounded-full" src={{post.user.user_profile.profile_image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s profile picture"></a>
+                    <div class="text-left">    
+                        <a href="{% url 'profile' post.user.id %}">{{post.user.first_name}} {{post.user.last_name}}</a>
+                        <span>Created: {{post.date_created}}</span>
+                        <span>Edited: {{post.date_edited}}</span>
+                        {% if post.image %}
+                            <img src={{post.image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s post">
+                        {% endif %}
+                        <p>{{post.text_content}}</p>
+                    </div>
+                </div>
+                <a class="inline-block px-6 py-2.5 bg-sky-200 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-sky-300 hover:shadow-lg focus:bg-sky-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-sky-400 active:shadow-lg transition duration-150 ease-in-out" href={% url 'comments' post.id %}>Comments</a>
+                {% if post.user == request.user %}
+                    <a class="inline-block px-6 py-2.5 bg-rose-200 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-rose-300 hover:shadow-lg focus:bg-rose-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-rose-400 active:shadow-lg transition duration-150 ease-in-out" href={% url 'edit_post' post.id %}>Edit</a>
+                {% endif %}
+            </div>
+        </figure>
     {% endfor %}
     {% if user == request.user %}
         <a href={% url 'edit_profile' %}>edit profile</a>

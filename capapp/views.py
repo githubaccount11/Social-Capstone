@@ -402,8 +402,12 @@ def get_comments(request, post_id):
             'comment': {"id": comment.id, "post_id": comment.post.id, "text_content": comment.text_content, "user__first_name": comment.user.first_name, "user__last_name": comment.user.last_name, "user__id": comment.user.id, "date_created": comment.date_created, "date_edited": comment.date_edited},
             'subments': get_subments(comment.id)
         })
-    print(comments)
-    return JsonResponse({"data": comments})
+    data = [
+        comments,
+        request.user.id
+    ]
+    # print(comments)
+    return JsonResponse({"data": data})
 
 def get_subments(comment_id):
     comment = Comments.objects.get(id=comment_id)
