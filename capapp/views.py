@@ -1,7 +1,8 @@
+from typing import Tuple
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import auth
 from django.contrib.auth.models import User
-from .forms import AuthForm, NewPost, ProfileForm, NewComment
+from .forms import AuthForm, ProfileForm
 from .models import Post, Profile, Comments
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
@@ -242,6 +243,8 @@ def friend(request, user_id):
             profile.unconfirmed.remove(unconfirmed[0])
             profile.friends.add(User.objects.get(id=user_id))
             other_profile.friends.add(request.user)
+            if other_profile.friends.filter(id=request.user.id):
+                print("user added")
         else:
             your_unconfirmed = other_profile.unconfirmed.filter(id=request.user.id)
             if your_unconfirmed:
@@ -252,6 +255,8 @@ def friend(request, user_id):
                 other_profile.unconfirmed.add(request.user)
     profile.save()
     other_profile.save()
+    if other_profile.friends.filter(id=request.user.id):
+        print("user added second check")
     return redirect(f'../profile/{user_id}')
 
 def follow(request, user_id):
@@ -271,23 +276,27 @@ def follow(request, user_id):
 @login_required
 def index(request):
     if request.method == "POST":
-        form = NewPost(request.POST)
-        if form.is_valid():
-            post = Post()
-            post.text_content = form.cleaned_data['text_content']
-            post.user = request.user
-            post.public = form.cleaned_data['public']
-            post.private = form.cleaned_data['private']
-            post.image = form.cleaned_data['image']
-            post.video = form.cleaned_data['video']
-            post.save()
+        form = request.POST
+        post = Post()
+        post.text_content = form.get('text_content')
+        post.user = request.user
+        if form.get('public') == 'on':
+            post.public = True
+        else:
+            post.public = False
+        if form.get('private') == 'on':
+            post.private = True
+        else:
+            post.private = False
+        post.image = form.get('image')
+        post.video = form.get('video')
+        post.save()
         return redirect('../')
     feed = list(Post.objects.filter(Q(user__in=request.user.user_profile.following.all()) & Q(public=True)))
     feed += list(Post.objects.filter(Q(user__in=request.user.user_profile.friends.all()) & Q(private=True)))
     feed += list(Post.objects.filter(user=request.user))
     feed.sort(key = lambda x:x.date_created)
     context = {
-        'form': NewPost,
         'feed': feed
     }
     return render(request, 'capapp/index.html', context)
@@ -301,13 +310,7 @@ def edit_post(request, post_id):
             return redirect(f'../')
         if request.user == post.user:
             context = {
-                "post": post,
-                "form": NewPost({
-                    "public": post.public,
-                    "private": post.private,
-                    "text_content": post.text_content,
-                    "image": post.image,
-                    "video": post.video})
+                "post": post
             }
             return render(request, 'capapp/edit_post.html', context)
         else:
@@ -318,14 +321,19 @@ def edit_post(request, post_id):
         except Post.DoesNotExist:
             return redirect(f'../')
         if request.user == post.user:
-            form = NewPost(request.POST)
-            if form.is_valid():
-                post.public = form.cleaned_data['public']
-                post.private = form.cleaned_data['private']
-                post.text_content = form.cleaned_data['text_content']
-                post.image = form.cleaned_data['image']
-                post.video = form.cleaned_data['video']
-                post.save()
+            form = request.POST
+            if form.get('public') == 'on':
+                post.public = True
+            else:
+                post.public = False
+            if form.get('private') == 'on':
+                post.private = True
+            else:
+                post.private = False
+            post.text_content = form.get('text_content')
+            post.image = form.get('image')
+            post.video = form.get('video')
+            post.save()
             return redirect(f'../')
     return redirect(f'../')
 
@@ -339,29 +347,26 @@ def comments(request, post_id):
 def make_comment(request, post_id, comment_id):
     post = Post.objects.get(id=post_id)
     if request.method == "POST":
-        form = NewComment(request.POST)
-        if form.is_valid():
-            comment = Comments()
-            comment.text_content = form.cleaned_data['text_content']
-            comment.user = request.user
-            comment.post = post
-            if comment_id != 0:
-                comment.parentment = Comments.objects.get(id=comment_id)
-            comment.save()
+        form = request.POST
+        comment = Comments()
+        comment.text_content = form.get('text_content')
+        comment.user = request.user
+        comment.post = post
+        if comment_id != 0:
+            comment.parentment = Comments.objects.get(id=comment_id)
+        comment.save()
         return redirect('comments', post_id=post_id)
     if comment_id != 0:
         comment = Comments.objects.filter(id=comment_id)
         if comment:
             context = {
                 'post': post,
-                'comment': comment[0],
-                'form': NewComment
+                'comment': comment[0]
             }
     else:
         context = {
             'comment': False,
-            'post': post,
-            'form': NewComment
+            'post': post
         }
     return render(request, 'capapp/make_comment.html', context)
 
@@ -373,9 +378,7 @@ def edit_comment(request, comment_id):
             return redirect(f'../')
         if request.user == comment.user:
             context = {
-                "comment": comment,
-                "form": NewComment({
-                    "text_content": comment.text_content})
+                "comment": comment
             }
             return render(request, 'capapp/edit_comment.html', context)
         else:
@@ -386,10 +389,9 @@ def edit_comment(request, comment_id):
         except Post.DoesNotExist:
             return redirect(f'../comments/{comment.post.id}')
         if request.user == comment.user:
-            form = NewPost(request.POST)
-            if form.is_valid():
-                comment.text_content = form.cleaned_data['text_content']
-                comment.save()
+            form = request.POST
+            comment.text_content = form.get('text_content')
+            comment.save()
             return redirect(f'../comments/{comment.post.id}')
     return redirect(f'../comments/{comment.post.id}')
 

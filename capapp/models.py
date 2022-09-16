@@ -39,8 +39,8 @@ class Profile(models.Model):
     
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_post")
-    public = models.BooleanField()
-    private = models.BooleanField()
+    public = models.BooleanField(blank=True, null=True)
+    private = models.BooleanField(blank=True, null=True)
     text_content = models.CharField(max_length=1000, blank=True, null=True)
     image = models.URLField(max_length=1000, blank=True, null=True)
     video = models.URLField(max_length=1000, blank=True, null=True)

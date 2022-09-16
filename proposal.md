@@ -77,7 +77,7 @@ Milestone 2:
 - complete profile, posting (except maybe video posts), user search, and basic chat
 
 Milestone 3:
-- complete chat, video posting, image hosting, blocking, reporting
+- complete chat, video posting,  blocking, reporting
 
 Milestone 4:
-- privacy policy, TOS, get domain, scale, dark mode
+- privacy policy, TOS, get domain, scale, image hosting, dark mode

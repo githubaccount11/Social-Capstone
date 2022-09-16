@@ -1,5 +1,11 @@
 {% extends 'capapp/base.html' %}
-{% block title %}{{request.user.username}}{% endblock title %}
+{% block title %}
+{% if user == request.user %}
+{{request.user.username}}
+{% else %}
+{{user.first_name}}
+{% endif %}
+{% endblock title %}
 {% block content %}
     {% if user == request.user %}
         <h4>Hello {{request.user.username}}</h4>
@@ -7,54 +13,71 @@
     
     <p>{{profile.user.first_name}} {{profile.user.last_name}}</p>
     <div class="flex" id="post-head">
-        <img class="m-3 border w-50 h-50 rounded-full" src={{profile.profile_image}} alt="{{request.user.first_name}} {{request.user.last_name}}'s profile picture">
+        <img class="m-3 border w-96 h-96 rounded-full" src={{profile.profile_image}} alt="{{request.user.first_name}} {{request.user.last_name}}'s profile picture">
         {% for image in profile.images.all %}
         <img src={{image.url}} alt="{{request.user.first_name}} {{request.user.last_name}}'s gallery">
         {% endfor %}
-        {% if user != request.user %}
-        <a href="{% url 'friend' user.id %}">{{friend}}</a>
-        {% if follower %}
-        <a href="{% url 'follow' user.id %}">Unfollow</a>
-        {% else %}
-        <a href="{% url 'follow' user.id %}">Follow</a>
-        {% endif %}
-        {% endif %}
-        {% if user == request.user %}
-        {% for potential in profile.unconfirmed.all %}
-            <a href="{% url 'profile' potential.id %}"><img src={{potential.user_profile.profile_image}} alt="{{potential.first_name}} {{potential.last_name}}'s profile picture"></a>
-            <a href="{% url 'profile' potential.id %}"><p>{{potential.first_name}} {{potential.last_name}}</p></a>
-        {% endfor %}
-        {% endif %}
-        <div>
-            <p>age: {{profile.age}}</p>
-            <p>location: {{profile.location}}</p>
-            <p>phone: {{profile.phone}}</p>
-            <p>email: {{profile.email}}</p>
-            <p>gender: {{profile.gender}}</p>
-            <p>work: {{profile.work}}</p>
-            <p>education: {{profile.education}}</p>
-            <p>birthday: {{profile.birthday}}</p>
-            <p>date joined: {{profile.date_joined}}</p>
+        <div class='flex items-center justify-center'>
+            <div>
+                {% if user != request.user %}
+                    <a class="inline-block px-6 py-2.5 bg-sky-200 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-sky-300 hover:shadow-lg focus:bg-sky-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-sky-400 active:shadow-lg transition duration-150 ease-in-out" href="{% url 'friend' user.id %}">{{friend}}</a>
+                    {% if follower %}
+                    <a class="inline-block px-6 py-2.5 bg-rose-200 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-rose-300 hover:shadow-lg focus:bg-rose-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-rose-400 active:shadow-lg transition duration-150 ease-in-out" href="{% url 'follow' user.id %}">Unfollow</a>
+                    {% else %}
+                    <a class="inline-block px-6 py-2.5 bg-rose-200 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-rose-300 hover:shadow-lg focus:bg-rose-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-rose-400 active:shadow-lg transition duration-150 ease-in-out" href="{% url 'follow' user.id %}">Follow</a>
+                    {% endif %}
+                {% endif %}
+                {% if user == request.user %}
+                    <div>
+                        {% if profile.unconfirmed.all %}
+                            <p>Unconfirmed:</p>
+                            <div class="flex w-4/5 flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
+                                {% for potential in profile.unconfirmed.all %}
+                                    <div class="mx-2">
+                                        <a href="{% url 'profile' potential.id %}"><img class=" border w-24 h-24 rounded-full" src={{potential.user_profile.profile_image}} alt="{{potential.first_name}} {{potential.last_name}}'s profile picture"></a>
+                                        <a href="{% url 'profile' potential.id %}"><p>{{potential.first_name}}</p><p>{{potential.last_name}}</p></a>
+                                    </div>
+                                {% endfor %}
+                            </div>  
+                        {% endif %}
+                    </div>
+                {% endif %}
+                <p>age: {{profile.age}}</p>
+                <p>location: {{profile.location}}</p>
+                <p>phone: {{profile.phone}}</p>
+                <p>email: {{profile.email}}</p>
+                <p>gender: {{profile.gender}}</p>
+                <p>work: {{profile.work}}</p>
+                <p>education: {{profile.education}}</p>
+                <p>birthday: {{profile.birthday}}</p>
+                <p>date joined: {{profile.date_joined}}</p>
+            </div>
         </div>
     </div>
+    {% if user == request.user %}
+        <a class="inline-block px-6 py-2.5 bg-rose-200 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-rose-300 hover:shadow-lg focus:bg-rose-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-rose-400 active:shadow-lg transition duration-150 ease-in-out"
+         href={% url 'edit_profile' %}>edit profile</a>
+    {% endif %}
     <p>friends:</p>
     {% for friend in profile.friends.all %}
-        <a href="{% url 'profile' friend.id %}"><img src={{friend.user_profile.profile_image}} alt="{{friend.first_name}} {{friend.last_name}}'s profile picture"></a>
+        <a href="{% url 'profile' friend.id %}"><img class=" border w-24 h-24 rounded-full" src={{friend.user_profile.profile_image}} alt="{{friend.first_name}} {{friend.last_name}}'s profile picture"></a>
         <a href="{% url 'profile' friend.id %}"><p>{{potential.first_name}} {{potential.last_name}}</p></a>
     {% endfor %}
     <p>followers:</p>
     {% for follower in profile.followers.all %}
-        <a href="{% url 'profile' follower.id %}"><img src={{follower.user_profile.profile_image}} alt="{{follower.first_name}} {{follower.last_name}}'s profile picture"></a>
+        <a href="{% url 'profile' follower.id %}"><img class=" border w-24 h-24 rounded-full" src={{follower.user_profile.profile_image}} alt="{{follower.first_name}} {{follower.last_name}}'s profile picture"></a>
         <a href="{% url 'profile' follower.id %}"><p>{{potential.first_name}} {{potential.last_name}}</p></a>
     {% endfor %}
     <p>following:</p>
     {% for followee in profile.folowing.all %}
-        <a href="{% url 'profile' followee.id %}"><img src={{followee.user_profile.profile_image}} alt="{{followee.first_name}} {{followee.last_name}}'s profile picture"></a>
+        <a href="{% url 'profile' followee.id %}"><img class=" border w-24 h-24 rounded-full" src={{followee.user_profile.profile_image}} alt="{{followee.first_name}} {{followee.last_name}}'s profile picture"></a>
         <a href="{% url 'profile' followee.id %}"><p>{{potential.first_name}} {{potential.last_name}}</p></a>
     {% endfor %}
-    <div class="text-center">
-        <p>Your posts:</p>
-    </div>
+    {% if user == requet.user %}
+        <div class="text-center">
+            <p>Your posts:</p>
+        </div>
+    {% endif %}
     {% for post in feed %}
         <figure class="bg-slate-50 rounded-xl p-4 m-2">
             <div class="space-y-4" id="post">
@@ -77,7 +100,4 @@
             </div>
         </figure>
     {% endfor %}
-    {% if user == request.user %}
-        <a href={% url 'edit_profile' %}>edit profile</a>
-    {% endif %}
 {% endblock content %}

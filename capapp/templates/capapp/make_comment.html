@@ -12,7 +12,7 @@
         {% endif %}
         <form action="{% url 'make_comment' post.id comment.id %}" method="POST">
             {% csrf_token %}
-            {{form.as_p}}
+            <input name="text_content" type="text">
             <button>Comment</button>
     {% else %}
         <a href="{% url 'profile' post.user.id %}"><img src={{post.user.user_profile.profile_image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s profile picture"></a>

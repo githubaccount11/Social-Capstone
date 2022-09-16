@@ -35,12 +35,12 @@ class ProfileForm(ModelForm):
            'education': forms.TextInput(attrs={'placeholder': 'Education:'}),
         }
 
-class NewPost(ModelForm):
-    class Meta:
-        model = Post
-        fields = ['public', 'private', 'text_content', 'image', 'video']
+# class NewPost(ModelForm):
+#     class Meta:
+#         model = Post
+#         fields = ['public', 'private', 'text_content', 'image', 'video']
 
-class NewComment(ModelForm):
-    class Meta:
-        model = Comments
-        fields = ['text_content']
+# class NewComment(ModelForm):
+#     class Meta:
+#         model = Comments
+#         fields = ['text_content']

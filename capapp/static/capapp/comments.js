@@ -1,5 +1,5 @@
 
-function showComments(comment, parent_id, depth, user_id) {
+function showComments(comment, parent_id, user_id) {
     // do something with comment
     collapseDiv = document.createElement("div")
     collapseDiv.setAttribute("name", `collapse-${parent_id}`)
@@ -10,12 +10,12 @@ function showComments(comment, parent_id, depth, user_id) {
     figureDiv.className = "space-y-4"
     div.setAttribute("id",`comment-${comment.comment.id}`);
     let parent;
-    if (depth == 0) {
+    if (parent_id == 0) {
         parent = document.querySelector("#comments")
     } else {
         parent = document.querySelector(`#comment-${parent_id}`)
     }
-    div.classList.add(`pl-${(depth * 5)}`)
+    div.classList.add(`pl-5`)
     figure.appendChild(figureDiv)
     div.appendChild(figure)
     collapseDiv.appendChild(div)
@@ -76,7 +76,7 @@ function showComments(comment, parent_id, depth, user_id) {
     }
 
     for (subment of comment.subments) {
-        showComments(subment, comment.comment.id, depth + 1, user_id)
+        showComments(subment, comment.comment.id, user_id)
     }
 }
 
@@ -84,7 +84,8 @@ fetch(`/get_comments/${post}`)
 .then(response => response.json())
 .then(data => {
     results = data.data
+    console.log(results)
     for (comment of results[0]) {
-        showComments(comment, 0, 0, results[1])
+        showComments(comment, 0, results[1])
     }
 })

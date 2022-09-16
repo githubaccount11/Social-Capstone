@@ -3,7 +3,56 @@
 {% block content %}
     <form action="{% url 'edit_post' post.id %}" method="POST">
         {% csrf_token %}
-        {{form.as_p}}
-        <button>Save Edit</button>
+        <label for="private" class="form-label inline-block mb-2 text-gray-700"
+        >Post to friends:</label>
+        {% if post.private %}
+        <input id="private" name="private" type="checkbox" checked>
+        {% else %}
+        <input id="private" name="private" type="checkbox">
+        {% endif %}
+        <label for="public" class="form-label inline-block mb-2 text-gray-700"
+        >Post to followers:</label>
+        {% if post.public %}
+        <input id="public" name="public" type="checkbox" checked>
+        {% else %}
+        <input id="public" name="public" type="checkbox">
+        {% endif %}
+        <div>
+            <label for="exampleFormControlTextarea1" class="form-label inline-block mb-2 text-gray-700"
+            >Post:</label>
+            <textarea
+            class="
+                mb-2
+                form-control
+                block
+                w-full
+                px-3
+                py-1.5
+                text-base
+                font-normal
+                text-gray-700
+                bg-white bg-clip-padding
+                border border-solid border-gray-300
+                rounded
+                transition
+                ease-in-out
+                focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none
+            "
+            id="exampleFormControlTextarea1"
+            rows="3"
+            name="text_content"
+            value="{{comment.text_content}}"
+            placeholder="Write a post: "
+            ></textarea>
+        </div>
+        <label for="image" class="form-label inline-block mb-2 text-gray-700"
+        >Image url:</label>
+        <input id="image" name="image" type="text" class="border" value="{{post.image}}">
+        <label for="video" class="form-label inline-block mb-2 text-gray-700"
+        >Video url:</label>
+        <input id="video" name="video" type="text" class="border" value="{{post.video}}">
+        <div class="text-center">
+            <button class="m-2 inline-block px-6 py-2.5 bg-sky-200 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-sky-300 hover:shadow-lg focus:bg-sky-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-sky-400 active:shadow-lg transition duration-150 ease-in-out">Save</button>
+        </div>
     </form>
 {% endblock content %}
