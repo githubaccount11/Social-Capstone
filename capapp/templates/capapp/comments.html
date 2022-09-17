@@ -15,9 +15,9 @@
             <div class="flex" id="post-head">
                 <a class="px-6" href="{% url 'profile' post.user.id %}"><img class=" border w-24 h-24 rounded-full" src={{post.user.user_profile.profile_image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s profile picture"></a>
                 <div class="text-left">
-                    <a class="pr-3" href="{% url 'profile' post.user.id %}">{{post.user.first_name}} {{post.user.last_name}}</a>
-                    <span class="px-3">Created: {{post.date_created}}</span>
-                    <span class="px-3">Edited: {{post.date_edited}}</span>
+                    <a class="text-slate-500 pr-3" href="{% url 'profile' post.user.id %}">{{post.user.first_name}} {{post.user.last_name}}</a>
+                    <span class="text-slate-500 px-3">Created: {{post.date_created}}</span>
+                    <span class="text-slate-500 px-3">Edited: {{post.date_edited}}</span>
                     {% if post.image %}
                         <img src={{post.image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s post">
                     {% endif %}

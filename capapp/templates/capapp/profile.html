@@ -1,10 +1,10 @@
 {% extends 'capapp/base.html' %}
 {% block title %}
-{% if user == request.user %}
-{{request.user.username}}
-{% else %}
-{{user.first_name}}
-{% endif %}
+    {% if user == request.user %}
+        {{request.user.username}}
+    {% else %}
+        {{user.first_name}}
+    {% endif %}
 {% endblock title %}
 {% block content %}
     {% if user == request.user %}
@@ -94,11 +94,11 @@
         <figure class="bg-slate-50 rounded-xl p-4 m-2">
             <div class="space-y-4" id="post">
                 <div class="flex" id="post-head">
-                    <a href="{% url 'profile' post.user.id %}"><img class=" border w-24 h-24 rounded-full" src={{post.user.user_profile.profile_image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s profile picture"></a>
+                    <a href="{% url 'profile' post.user.id %}"><img class="mr-2 border w-24 h-24 rounded-full" src={{post.user.user_profile.profile_image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s profile picture"></a>
                     <div class="text-left">    
-                        <a href="{% url 'profile' post.user.id %}">{{post.user.first_name}} {{post.user.last_name}}</a>
-                        <span>Created: {{post.date_created}}</span>
-                        <span>Edited: {{post.date_edited}}</span>
+                        <a class="text-slate-500" href="{% url 'profile' post.user.id %}">{{post.user.first_name}} {{post.user.last_name}}</a>
+                        <span class="text-slate-500">Created: {{post.date_created}}</span>
+                        <span class="text-slate-500">Edited: {{post.date_edited}}</span>
                         {% if post.image %}
                             <img src={{post.image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s post">
                         {% endif %}

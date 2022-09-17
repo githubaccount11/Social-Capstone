@@ -70,9 +70,6 @@ def saveForm(profile, form):
     profile.display_following = form.cleaned_data['display_following']
     profile.save()
 
-def collect_posts(request, page):
-    
-
 @login_required
 def profile(request, user_id):
     user = get_object_or_404(User, id=user_id)
@@ -196,17 +193,13 @@ def edit_profile(request):
     return redirect(f'../profile/{request.user.id}')
 
 def login(request):
-    print("1")
     if request.method == "POST":
-        print(2)
         form = AuthForm(request.POST)
         if form.is_valid():
-            print(3)
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
 
             user = auth.authenticate(username=username, password=password)
-            print(user)
             if user:
                 auth.login(request, user)
                 next = request.GET.get('next')
@@ -232,7 +225,6 @@ def search(request):
 
 def search_run(request, page, search_query):
     users = User.objects.filter(Q(username__icontains=search_query) | Q(first_name__icontains=search_query) | Q(last_name__icontains=search_query))[page*30:(page+1)*30]
-    print(users)
     # users = users.exclude(username=request.user.username)
     for index in range(len(list(users.values()))):
         if list(users.values())[index]["username"] == request.user.username:
@@ -256,8 +248,6 @@ def friend(request, user_id):
             profile.unconfirmed.remove(unconfirmed[0])
             profile.friends.add(User.objects.get(id=user_id))
             other_profile.friends.add(request.user)
-            if other_profile.friends.filter(id=request.user.id):
-                print("user added")
         else:
             your_unconfirmed = other_profile.unconfirmed.filter(id=request.user.id)
             if your_unconfirmed:
@@ -268,8 +258,6 @@ def friend(request, user_id):
                 other_profile.unconfirmed.add(request.user)
     profile.save()
     other_profile.save()
-    if other_profile.friends.filter(id=request.user.id):
-        print("user added second check")
     return redirect(f'../profile/{user_id}')
 
 def follow(request, user_id):

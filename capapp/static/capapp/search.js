@@ -32,17 +32,5 @@ const app = Vue.createApp({
         //       this.search()
         //     }
         //   }
-    },
-    watch: {
-      locations: function(locations){
-        this.layerGroup.clearLayers()
-        for(let user of locations){
-          this.layerGroup.addLayer(
-            L.marker([user.location__latitude, user.location__longitude])
-            .bindPopup(user.username)
-            .openPopup()
-          )
-        }
-      }
     }
   }).mount("#app")
