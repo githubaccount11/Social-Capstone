@@ -10,19 +10,25 @@ from django.http import JsonResponse
 
 # Create your views here.
 def register(request):
+    error = ""
     if request.method == "POST":
         form = AuthForm(request.POST)
         if form.is_valid():
-            user = User.objects.create_user(
-                username=form.cleaned_data['username'],
-                password=form.cleaned_data['password'],
-                first_name=form.cleaned_data['first_name'],
-                last_name=form.cleaned_data['last_name'],
-            )
-            auth.login(request, user)
-            return redirect('../register_profile')
+            taken = User.objects.filter(username=form.cleaned_data['username'])
+            if not taken:
+                user = User.objects.create_user(
+                    username=form.cleaned_data['username'],
+                    password=form.cleaned_data['password'],
+                    first_name=form.cleaned_data['first_name'],
+                    last_name=form.cleaned_data['last_name'],
+                )
+                auth.login(request, user)
+                return redirect('../register_profile')
+            else:
+                error = "That username is taken"
     context = {
         'form': AuthForm(),
+        'error': error
     }
     return render(request, 'capapp/register.html', context)
 
@@ -64,6 +70,9 @@ def saveForm(profile, form):
     profile.display_following = form.cleaned_data['display_following']
     profile.save()
 
+def collect_posts(request, page):
+    
+
 @login_required
 def profile(request, user_id):
     user = get_object_or_404(User, id=user_id)
@@ -74,11 +83,15 @@ def profile(request, user_id):
         feed = list(Post.objects.filter(user=request.user))
     else:
         friend = profile.friends.filter(id=request.user.id)
-        if friend:
-            feed = list(Post.objects.filter(Q(user=user) & Q(public=True)))
         follower = profile.followers.filter(id=request.user.id)
-        if follower:
-            feed += list(Post.objects.filter(Q(user=user) & Q(private=True)))
+        if friend:
+            if follower:
+                feed = list(Post.objects.filter(Q(user=user), Q(public=True) | Q(private=True)))
+            else:
+                feed = list(Post.objects.filter(Q(user=user) & Q(public=True)))
+        else:
+            if follower:
+                feed = list(Post.objects.filter(Q(user=user) & Q(private=True)))
     feed.sort(key = lambda x:x.date_created)
 
     if user != request.user:
@@ -225,7 +238,7 @@ def search_run(request, page, search_query):
         if list(users.values())[index]["username"] == request.user.username:
             list(users.values()).pop(index)
     results = list(users.values("first_name", "last_name", "id", "user_profile__profile_image"))
-    print(results)
+    # print(results)
     return JsonResponse({"data": results})
 
 def friend(request, user_id):

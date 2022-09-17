@@ -6,8 +6,8 @@ from datetime import date
 class AuthForm(forms.Form):
     username = forms.CharField(max_length=20, label="Username", widget=forms.TextInput(attrs={'placeholder': 'Username:'}))
     password = forms.CharField(max_length=20, label="Password", widget=forms.PasswordInput(attrs={'placeholder': 'Password:'}))
-    first_name = forms.CharField(max_length=20, label="First Name", required=False)
-    last_name = forms.CharField(max_length=20, label="Last Name", required=False)
+    first_name = forms.CharField(max_length=20, label="First Name", required=False, widget=forms.TextInput(attrs={'placeholder': 'First name:'}))
+    last_name = forms.CharField(max_length=20, label="Last Name", required=False, widget=forms.TextInput(attrs={'placeholder': 'Last name:'}))
     
 class DateInput(forms.DateInput):
     input_type = "date"

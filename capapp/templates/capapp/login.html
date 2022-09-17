@@ -2,11 +2,17 @@
 {% extends 'capapp/base.html' %}
 {% block title %}Login{% endblock title %}
 {% block content %}
-    <h1>Login</h1>
-    <form action="{% url 'login' %}" method="POST">
-        {% csrf_token %}
-        {{form.username}}
-        {{form.password}}
-        <button>Login</button>
-    </form>
+    <div class="text-center">
+        <h1>Login</h1>
+        <form action="{% url 'login' %}" method="POST">
+            {% csrf_token %}
+            <div>
+                {{form.username}}
+            </div>
+            <div>
+                {{form.password}}
+            </div>
+            <button class="inline-block px-6 py-2.5 bg-sky-200 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-sky-300 hover:shadow-lg focus:bg-sky-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-sky-400 active:shadow-lg transition duration-150 ease-in-out">Login</button>
+        </form>
+    </div>
 {% endblock content %}

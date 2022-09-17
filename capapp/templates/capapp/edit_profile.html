@@ -3,7 +3,39 @@
 {% block content %}
     <form action="{% url 'edit_profile' %}" method="POST">
         {% csrf_token %}
-        {{form.as_p}}
-        <button>Save Edit</button>
+        <div class="text-center">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">Profile Image:{{form.profile_image}}</div>
+                <div>Age:{{form.age}}</div>
+                <div>Display Age:{{form.display_age}}</div>
+                {{form.lat.as_hidden}}
+                {{form.long.as_hidden}}
+                <div>Location:{{form.location}}</div>
+                <div>Display Location:{{form.display_location}}</div>
+                <div>Phone:{{form.phone}}</div>
+                <div>Display Phone:{{form.display_phone}}</div>
+                <div>Email:{{form.email}}</div>
+                <div>Display Email:{{form.display_email}}</div>
+                <div>Gender:{{form.gender}}</div>
+                <div>Display Gender:{{form.display_gender}}</div>
+                <div>Work:{{form.work}}</div>
+                <div>Display Work:{{form.display_work}}</div>
+                <div>Education:{{form.education}}</div>
+                <div>Display Education:{{form.display_education}}</div>
+                <div>Birthday:{{form.birthday}}</div>
+                <div>Display Birthday:{{form.display_birthday}}</div>
+                <div></div>
+                <div>Display Date Joined:{{form.display_date_joined}}</div>
+                <div></div>
+                <div>Display Friends:{{form.display_friends}}</div>
+                <div></div>
+                <div>Display Followers:{{form.display_followers}}</div>
+                <div></div>
+                <div>Display Following:{{form.display_following}}</div>
+            </div>
+        </div>
+        <div class="text-center">
+            <button class="mt-2 inline-block px-6 py-2.5 bg-sky-200 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-sky-300 hover:shadow-lg focus:bg-sky-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-sky-400 active:shadow-lg transition duration-150 ease-in-out">Save</button>
+        </div>
     </form>
 {% endblock content %}
