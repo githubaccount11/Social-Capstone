@@ -36,6 +36,7 @@ class Profile(models.Model):
     display_followers = models.BooleanField(default=False)
     following = models.ManyToManyField(User, related_name="following_profile", blank=True)
     display_following = models.BooleanField(default=False)
+    blocked = models.ManyToManyField(User, related_name="blocked_profile", blank=True)
     
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_post")

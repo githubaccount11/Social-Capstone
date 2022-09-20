@@ -72,9 +72,15 @@ def saveForm(profile, form):
 
 @login_required
 def profile(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    profile = get_object_or_404(Profile, user=user)
+    try:
+        user = User.objects.get(id=user_id)
+        profile = Profile.objects.get(user=user)
+    except (User.DoesNotExist, Profile.DoesNotExist):
+        return render(request, 'capapp/profile_not_found.html')
     
+    if request.user in list(profile.blocked.all()):
+        return render(request, 'capapp/profile_not_found.html')
+
     feed = []
     if user == request.user:
         feed = list(Post.objects.filter(user=request.user))
@@ -91,13 +97,16 @@ def profile(request, user_id):
                 feed = list(Post.objects.filter(Q(user=user) & Q(private=True)))
     feed.sort(key = lambda x:x.date_created)
 
+    print("followers:", profile.followers.all())
+    print("followees:", profile.following.all())
     if user != request.user:
+        your_profile = Profile.objects.get(user=request.user)
         friend = "Friend"
         follower = False
+        blocked = False
         if profile.friends.filter(id=request.user.id):
             friend = "Unfriend"
         else:
-            your_profile = Profile.objects.get(user=request.user)
             if your_profile.unconfirmed.filter(id=user_id):
                 friend = "Confirm"
             else:
@@ -105,36 +114,40 @@ def profile(request, user_id):
                     friend = "Unsend"
         if profile.followers.filter(id=request.user.id):
             follower = True
-        if not profile.display_age:
-            profile.age = ""
-        if not profile.display_location:
-            profile.location = ""
-        if not profile.display_phone:
-            profile.phone = ""
-        if not profile.display_email:
-            profile.email = ""
-        if not profile.display_gender:
-            profile.gender = ""
-        if not profile.display_work:
-            profile.work = ""
-        if not profile.display_education:
-            profile.education = ""
-        if not profile.display_birthday:
-            profile.birthday = ""
-        if not profile.display_date_joined:
-            profile.date_joined = ""
-        if not profile.display_friends:
-            profile.friends.set([])
-        if not profile.display_followers:
-            profile.followers.set([])
-        if not profile.display_following:
-            profile.following.set([])
+        if your_profile.blocked.filter(id=user_id):
+            blocked = True
+        values = []
+        if profile.display_age:
+            values += "age"
+        if profile.display_location:
+            values += "location"
+        if profile.display_phone:
+            values += "phone"
+        if profile.display_email:
+            values += "email"
+        if profile.display_gender:
+            values += "gender"
+        if profile.display_work:
+            values += "work"
+        if profile.display_education:
+            values += "education"
+        if profile.display_birthday:
+            values += "birthday"
+        if profile.display_date_joined:
+            values += "date_joined"
+        if profile.display_friends:
+            values += "friends"
+        if profile.display_followers:
+            values += "followers"
+        if profile.display_following:
+            values += "following"
         
         context = {
             "user" : user,
-            "profile": profile,
+            "profile": profile.values(values),
             "friend": friend,
-            "follower": follower
+            "follower": follower,
+            "blocked": blocked
         }
     else:
         context = {
@@ -226,12 +239,14 @@ def search(request):
 def search_run(request, page, search_query):
     users = User.objects.filter(Q(username__icontains=search_query) | Q(first_name__icontains=search_query) | Q(last_name__icontains=search_query))[page*30:(page+1)*30]
     # users = users.exclude(username=request.user.username)
-    for index in range(len(list(users.values()))):
-        if list(users.values())[index]["username"] == request.user.username:
-            list(users.values()).pop(index)
-    results = list(users.values("first_name", "last_name", "id", "user_profile__profile_image"))
-    # print(results)
-    return JsonResponse({"data": results})
+    user_list = list(users.values("username", "first_name", "last_name", "id", "user_profile__profile_image", "user_profile"))
+    index = 0
+    while index < len(user_list):
+        if user_list[index]["username"] == request.user.username or request.user in list(Profile.objects.get(id=user_list[index]["user_profile"]).blocked.all()):
+            user_list.pop(index)
+        else:
+            index += 1
+    return JsonResponse({"data": user_list})
 
 def friend(request, user_id):
     profile = Profile.objects.get(user=request.user)
@@ -261,17 +276,29 @@ def friend(request, user_id):
     return redirect(f'../profile/{user_id}')
 
 def follow(request, user_id):
-    profile = Profile.objects.filter(user=request.user)[0]
-    other_profile = Profile.objects.filter(user__id=user_id)[0]
+    profile = Profile.objects.get(user=request.user)
+    other_profile = Profile.objects.get(user=user_id)
     followee = profile.following.filter(id=user_id)
     if followee:
+        print("remove follower")
         profile.following.remove(followee[0])
         other_profile.followers.remove(request.user)
     else:
+        print("add follower")
         profile.following.add(User.objects.get(id=user_id))
         other_profile.followers.add(request.user)
     profile.save()
     other_profile.save()
+    return redirect(f'../profile/{user_id}')
+
+def block(request, user_id):
+    profile = Profile.objects.get(user=request.user)
+    blocked = profile.blocked.filter(id=user_id)
+    if blocked:
+        profile.blocked.remove(blocked[0])
+    else:
+        profile.blocked.add(User.objects.get(id=user_id))
+    profile.save()
     return redirect(f'../profile/{user_id}')
 
 @login_required
@@ -296,6 +323,12 @@ def index(request):
     feed = list(Post.objects.filter(Q(user__in=request.user.user_profile.following.all()) & Q(public=True)))
     feed += list(Post.objects.filter(Q(user__in=request.user.user_profile.friends.all()) & Q(private=True)))
     feed += list(Post.objects.filter(user=request.user))
+    index = 0
+    while index < len(feed):
+        if request.user in list(Profile.objects.get(user=feed[index].user).blocked.all()):
+            feed.pop(index)
+        else:
+            index += 1
     feed.sort(key = lambda x:x.date_created)
     context = {
         'feed': feed
@@ -401,10 +434,11 @@ def get_comments(request, post_id):
     comments = []
     # print(post.comments.all())
     for comment in post.comments.all():
-        comments.append({
-            'comment': {"id": comment.id, "post_id": comment.post.id, "text_content": comment.text_content, "user__first_name": comment.user.first_name, "user__last_name": comment.user.last_name, "user__id": comment.user.id, "date_created": comment.date_created, "date_edited": comment.date_edited},
-            'subments': get_subments(comment.id)
-        })
+        if request.user not in list(Profile.objects.get(user=comment.user).blocked.all()):
+            comments.append({
+                'comment': {"id": comment.id, "post_id": comment.post.id, "text_content": comment.text_content, "user__first_name": comment.user.first_name, "user__last_name": comment.user.last_name, "user__id": comment.user.id, "date_created": comment.date_created, "date_edited": comment.date_edited},
+                'subments': get_subments(request, comment.id)
+            })
     data = [
         comments,
         request.user.id
@@ -412,12 +446,13 @@ def get_comments(request, post_id):
     # print(comments)
     return JsonResponse({"data": data})
 
-def get_subments(comment_id):
+def get_subments(request, comment_id):
     comment = Comments.objects.get(id=comment_id)
     comments = []
     for subment in comment.subments.all():
-        comments.append({
-            'comment': {"id": subment.id, "post_id": subment.post.id, "text_content": subment.text_content, "user__first_name": subment.user.first_name, "user__last_name": subment.user.last_name, "user__id": subment.user.id, "date_created": subment.date_created, "date_edited": subment.date_edited},
-            'subments': get_subments(subment.id)
-        })
+        if request.user not in list(Profile.objects.get(user=comment.user).blocked.all()):
+            comments.append({
+                'comment': {"id": subment.id, "post_id": subment.post.id, "text_content": subment.text_content, "user__first_name": subment.user.first_name, "user__last_name": subment.user.last_name, "user__id": subment.user.id, "date_created": subment.date_created, "date_edited": subment.date_edited},
+                'subments': get_subments(request, subment.id)
+            })
     return comments
