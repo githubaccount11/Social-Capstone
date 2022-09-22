@@ -1,4 +1,10 @@
 {% extends 'capapp/base.html' %}
+{% block load %}
+{% load static %}
+{% endblock load %}
+{% block header %}
+<script defer src="{% static 'capapp/delete_post.js' %}"></script>
+{% endblock header %}
 {% block title %}
     {% if user == request.user %}
         {{request.user.username}}
@@ -10,13 +16,9 @@
     {% if user == request.user %}
         <h4>Hello {{request.user.username}}</h4>
     {% endif %}
-    
-    <p>{{profile.user.first_name}} {{profile.user.last_name}}</p>
+    <p>{{user.first_name}} {{user.last_name}}</p>
     <div class="flex" id="post-head">
-        <img class="m-3 border w-96 h-96 rounded-full" src={{profile.profile_image}} alt="{{request.user.first_name}} {{request.user.last_name}}'s profile picture">
-        {% for image in profile.images.all %}
-        <img src={{image.url}} alt="{{request.user.first_name}} {{request.user.last_name}}'s gallery">
-        {% endfor %}
+        <img class="m-3 border w-96 h-96 rounded-full" src="{{user.user_profile.profile_image}}" alt="{{user.first_name}} {{user.last_name}}'s profile picture">
         <div class='flex items-center justify-center'>
             <div>
                 {% if user != request.user %}
@@ -34,10 +36,10 @@
                 {% endif %}
                 {% if user == request.user %}
                     <div>
-                        {% if profile.unconfirmed.all %}
+                        {% if unconfirmed %}
                             <p>Unconfirmed:</p>
                             <div class="flex w-4/5 flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
-                                {% for potential in profile.unconfirmed.all %}
+                                {% for potential in unconfirmed %}
                                     <div class="mx-2">
                                         <a href="{% url 'profile' potential.id %}"><img class=" border w-24 h-24 rounded-full" src={{potential.user_profile.profile_image}} alt="{{potential.first_name}} {{potential.last_name}}'s profile picture"></a>
                                         <a href="{% url 'profile' potential.id %}"><p>{{potential.first_name}}</p><p>{{potential.last_name}}</p></a>
@@ -47,15 +49,15 @@
                         {% endif %}
                     </div>
                 {% endif %}
-                <p>age: {{profile.age}}</p>
-                <p>location: {{profile.location}}</p>
-                <p>phone: {{profile.phone}}</p>
-                <p>email: {{profile.email}}</p>
-                <p>gender: {{profile.gender}}</p>
-                <p>work: {{profile.work}}</p>
-                <p>education: {{profile.education}}</p>
-                <p>birthday: {{profile.birthday}}</p>
-                <p>date joined: {{profile.date_joined}}</p>
+                <p>age: {{age}}</p>
+                <p>location: {{location}}</p>
+                <p>phone: {{phone}}</p>
+                <p>email: {{email}}</p>
+                <p>gender: {{gender}}</p>
+                <p>work: {{work}}</p>
+                <p>education: {{education}}</p>
+                <p>birthday: {{birthday}}</p>
+                <p>date joined: {{date_joined}}</p>
             </div>
         </div>
     </div>
@@ -63,37 +65,59 @@
         <a class="inline-block px-6 py-2.5 bg-rose-200 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-rose-300 hover:shadow-lg focus:bg-rose-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-rose-400 active:shadow-lg transition duration-150 ease-in-out"
          href={% url 'edit_profile' %}>edit profile</a>
     {% endif %}
-    <p>friends:</p>
-    <div class="flex w-4/5 flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
-        {% for friend in profile.friends.all %}
-            <div class="mx-2">
-                <a href="{% url 'profile' friend.id %}"><img class=" border w-24 h-24 rounded-full" src={{friend.user_profile.profile_image}} alt="{{friend.first_name}} {{friend.last_name}}'s profile picture"></a>
-                <a href="{% url 'profile' friend.id %}"><p>{{friend.first_name}}</p><p>{{friend.last_name}}</p></a>
-            </div>
-        {% endfor %}
-    </div>
-    <p>followers:</p>
-    <div class="flex w-4/5 flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
-        {% for follower in profile.followers.all %}
-            <div class="mx-2">
-                <a href="{% url 'profile' follower.id %}"><img class=" border w-24 h-24 rounded-full" src={{follower.user_profile.profile_image}} alt="{{follower.first_name}} {{follower.last_name}}'s profile picture"></a>
-                <a href="{% url 'profile' follower.id %}"><p>{{follower.first_name}}</p><p>{{follower.last_name}}</p></a>
-            </div>
-        {% endfor %}
-    </div>
-    <p>following:</p>
-    <div class="flex w-4/5 flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
-        {% for followee in profile.following.all %}
-            <div class="mx-2">
-                <a href="{% url 'profile' followee.id %}"><img class=" border w-24 h-24 rounded-full" src={{followee.user_profile.profile_image}} alt="{{followee.first_name}} {{followee.last_name}}'s profile picture"></a>
-                <a href="{% url 'profile' followee.id %}"><p>{{followee.first_name}}</p><p>{{followee.last_name}}</p></a>
-            </div>
-        {% endfor %}
-    </div>
-    {% if user == requet.user %}
-        <div class="text-center">
-            <p>Your posts:</p>
+    {% if user.user_profile.images.all %}
+        <p>gallery:</p>
+        <div class="flex w-screen flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar justify-items-start mb-8">
+            {% for image in user.user_profile.images.all %}
+                <div class="shrink-0">  
+                    <img class="border h-96" src={{image.url}} alt="{{user.first_name}} {{user.last_name}}'s gallery">
+                    {% if user == request.user %}
+                        <a class="top-0 right-0 inline-block px-6 py-2.5 bg-rose-200 text-white font-large text-xl leading-tight uppercase rounded shadow-md hover:bg-rose-300 hover:shadow-lg focus:bg-rose-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-rose-400 active:shadow-lg transition duration-150 ease-in-out" 
+                        href="{% url 'delete_image' image.id %}">X</a>
+                    {% endif %}
+                </div>  
+            {% endfor %}
         </div>
+    {% endif %}
+    {% if friends %}
+        <p>friends:</p>
+        <div class="flex w-4/5 flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
+            {% for friend in friends %}
+                <div class="mx-2">
+                    <a href="{% url 'profile' friend.id %}"><img class=" border w-24 h-24 rounded-full" src={{friend.user_profile.profile_image}} alt="{{friend.first_name}} {{friend.last_name}}'s profile picture"></a>
+                    <a href="{% url 'profile' friend.id %}"><p>{{friend.first_name}}</p><p>{{friend.last_name}}</p></a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if followers %}
+        <p>followers:</p>
+        <div class="flex w-4/5 flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
+            {% for follower in followers %}
+                <div class="mx-2">
+                    <a href="{% url 'profile' follower.id %}"><img class=" border w-24 h-24 rounded-full" src={{follower.user_profile.profile_image}} alt="{{follower.first_name}} {{follower.last_name}}'s profile picture"></a>
+                    <a href="{% url 'profile' follower.id %}"><p>{{follower.first_name}}</p><p>{{follower.last_name}}</p></a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if following %}
+        <p>following:</p>
+        <div class="flex w-4/5 flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
+            {% for followee in following %}
+                <div class="mx-2">
+                    <a href="{% url 'profile' followee.id %}"><img class=" border w-24 h-24 rounded-full" src={{followee.user_profile.profile_image}} alt="{{followee.first_name}} {{followee.last_name}}'s profile picture"></a>
+                    <a href="{% url 'profile' followee.id %}"><p>{{followee.first_name}}</p><p>{{followee.last_name}}</p></a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if user == request.user %}
+        {% if feed %}
+            <div class="text-center">
+                <p>Your posts:</p>
+            </div>
+        {% endif %}
     {% endif %}
     {% for post in feed %}
         <figure class="bg-slate-50 rounded-xl p-4 m-2">
@@ -105,7 +129,7 @@
                         <span class="text-slate-500">Created: {{post.date_created}}</span>
                         <span class="text-slate-500">Edited: {{post.date_edited}}</span>
                         {% if post.image %}
-                            <img src={{post.image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s post">
+                            <img class="border h-96" src={{post.image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s post">
                         {% endif %}
                         <p>{{post.text_content}}</p>
                     </div>
@@ -114,6 +138,7 @@
                 {% if post.user == request.user %}
                     <a class="inline-block px-6 py-2.5 bg-rose-200 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-rose-300 hover:shadow-lg focus:bg-rose-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-rose-400 active:shadow-lg transition duration-150 ease-in-out" 
                     href={% url 'edit_post' post.id %}>Edit</a>
+                    <a onclick="delete_post({{post.id}});" class="inline-block px-6 py-2.5 bg-yellow-200 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-yellow-300 hover:shadow-lg focus:bg-yellow-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-yellow-400 active:shadow-lg transition duration-150 ease-in-out">Delete</a>
                 {% endif %}
             </div>
         </figure>

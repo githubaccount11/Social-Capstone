@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import auth
 from django.contrib.auth.models import User
 from .forms import AuthForm, ProfileForm
-from .models import Post, Profile, Comments
+from .models import Post, Profile, Comments, Images
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse
@@ -96,10 +96,13 @@ def profile(request, user_id):
             if follower:
                 feed = list(Post.objects.filter(Q(user=user) & Q(private=True)))
     feed.sort(key = lambda x:x.date_created)
+    feed = feed[::-1]
 
-    print("followers:", profile.followers.all())
-    print("followees:", profile.following.all())
+    # print("followers:", profile.followers.all())
+    # print("followees:", profile.following.all())
+    
     if user != request.user:
+        print("users are equivalent")
         your_profile = Profile.objects.get(user=request.user)
         friend = "Friend"
         follower = False
@@ -116,45 +119,58 @@ def profile(request, user_id):
             follower = True
         if your_profile.blocked.filter(id=user_id):
             blocked = True
-        values = []
-        if profile.display_age:
-            values += "age"
-        if profile.display_location:
-            values += "location"
-        if profile.display_phone:
-            values += "phone"
-        if profile.display_email:
-            values += "email"
-        if profile.display_gender:
-            values += "gender"
-        if profile.display_work:
-            values += "work"
-        if profile.display_education:
-            values += "education"
-        if profile.display_birthday:
-            values += "birthday"
-        if profile.display_date_joined:
-            values += "date_joined"
-        if profile.display_friends:
-            values += "friends"
-        if profile.display_followers:
-            values += "followers"
-        if profile.display_following:
-            values += "following"
-        
+        #print("profile image:", profile.profile_image)
+        print("unconfirmed:", profile.unconfirmed.all())
         context = {
             "user" : user,
-            "profile": profile.values(values),
             "friend": friend,
             "follower": follower,
-            "blocked": blocked
+            "blocked": blocked,
+            "images": profile.images.all(),
         }
+        if profile.display_age:
+            context["age"] = profile.age
+        if profile.display_location:
+            context["location"] = profile.location
+        if profile.display_phone:
+            context["phone"] = profile.phone
+        if profile.display_email:
+            context["email"] = profile.email
+        if profile.display_gender:
+            context["gender"] = profile.gender
+        if profile.display_work:
+            context["work"] = profile.work
+        if profile.display_education:
+            context["education"] = profile.education
+        if profile.display_birthday:
+            context["birthday"] = profile.birthday
+        if profile.display_date_joined:
+            context["date_joined"] = profile.date_joined
+        if profile.display_friends:
+            context["friends"] = profile.friends.all()
+        if profile.display_followers:
+            context["followers"] = profile.followers.all()
+        if profile.display_following:
+            context["following"] = profile.following.all()
     else:
         context = {
             "feed": feed,
             "user": user,
-            "profile": profile
+            "images": profile.images.all(),
+            "unconfirmed": profile.unconfirmed.all(),
         }
+        context["age"] = profile.age
+        context["location"] = profile.location
+        context["phone"] = profile.phone
+        context["email"] = profile.email
+        context["gender"] = profile.gender
+        context["work"] = profile.work
+        context["education"] = profile.education
+        context["birthday"] = profile.birthday
+        context["date_joined"] = profile.date_joined
+        context["friends"] = profile.friends.all()
+        context["followers"] = profile.followers.all()
+        context["following"] = profile.following.all()
     return render(request, 'capapp/profile.html', context)
 
 @login_required
@@ -319,6 +335,13 @@ def index(request):
         post.image = form.get('image')
         post.video = form.get('video')
         post.save()
+        image = Images()
+        image.user = request.user
+        image.url = post.image
+        image.save()
+        profile = Profile.objects.get(user=request.user)
+        profile.images.add(image)
+        profile.save()
         return redirect('../')
     feed = list(Post.objects.filter(Q(user__in=request.user.user_profile.following.all()) & Q(public=True)))
     feed += list(Post.objects.filter(Q(user__in=request.user.user_profile.friends.all()) & Q(private=True)))
@@ -330,6 +353,7 @@ def index(request):
         else:
             index += 1
     feed.sort(key = lambda x:x.date_created)
+    feed = feed[::-1]
     context = {
         'feed': feed
     }
@@ -368,8 +392,24 @@ def edit_post(request, post_id):
             post.image = form.get('image')
             post.video = form.get('video')
             post.save()
+            image = Images()
+            image.user = request.user
+            image.url = post.image
+            image.save()
+            profile = Profile.objects.get(user=request.user)
+            profile.images.add(image)
+            profile.save()
             return redirect(f'../')
     return redirect(f'../')
+
+def delete_post(request, post_id):
+    Post.objects.get(id=post_id).delete()
+    return redirect(f'../')
+
+def delete_image(request, image_id):
+    image = Images.objects.get(id=image_id)
+    image.delete()
+    return redirect(request.path)
 
 def comments(request, post_id):
     post = Post.objects.get(id=post_id)
@@ -428,6 +468,10 @@ def edit_comment(request, comment_id):
             comment.save()
             return redirect(f'../comments/{comment.post.id}')
     return redirect(f'../comments/{comment.post.id}')
+
+def delete_comment(request, comment_id):
+    Comments.objects.get(id=comment_id).delete()
+    return redirect(f'../')
 
 def get_comments(request, post_id):
     post = Post.objects.get(id=post_id)

@@ -16,9 +16,12 @@ urlpatterns = [
     path('edit_profile/', views.edit_profile, name="edit_profile"),
     path('', views.index, name="index"),
     path('edit_post/<int:post_id>', views.edit_post, name="edit_post"),
+    path('delete_post/<int:post_id>', views.delete_post, name="delete_post"),
+    path('delete_image/<int:image_id>', views.delete_image, name="delete_image"),
     path('comments/<int:post_id>', views.comments, name="comments"),
     path('make_comment/<int:post_id>/', views.make_comment, {'comment_id': 0}, name="make_comment"),
     path('make_comment/<int:post_id>/<int:comment_id>', views.make_comment, name="make_comment"),
     path('edit_comment/<int:comment_id>', views.edit_comment, name="edit_comment"),
+    path('delete_comment/<int:comment_id>', views.delete_comment, name="delete_comment"),
     path('get_comments/<int:post_id>', views.get_comments, name="get_comments")
 ]
