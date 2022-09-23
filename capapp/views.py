@@ -421,7 +421,7 @@ def delete_image(request, image_id):
 def comments(request, post_id):
     profile = Profile.objects.get(user=request.user)
     post = Post.objects.get(id=post_id)
-    if post.user in profile.friends.all() and post.private or post.user in profile.following.all() and post.public:
+    if post.user == request.user or post.user in profile.friends.all() and post.private or post.user in profile.following.all() and post.public:
         context = {
             'post': post
         }
@@ -431,7 +431,8 @@ def comments(request, post_id):
 def make_comment(request, post_id, comment_id):
     profile = Profile.objects.get(user=request.user)
     post = Post.objects.get(id=post_id)
-    if post.user in profile.friends.all() and post.private or post.user in profile.following.all() and post.public:
+    print(request.user.id)
+    if post.user == request.user or post.user in profile.friends.all() and post.private or post.user in profile.following.all() and post.public:
         if request.method == "POST":
             form = request.POST
             comment = Comments()
@@ -455,7 +456,7 @@ def make_comment(request, post_id, comment_id):
                 'post': post
             }
         return render(request, 'capapp/make_comment.html', context)
-    return redirect('../')
+    return redirect('../../')
 
 def edit_comment(request, comment_id):
     if request.method == "GET":
@@ -495,7 +496,7 @@ def delete_comment(request, comment_id):
 def get_comments(request, post_id):
     post = Post.objects.get(id=post_id)
     profile = Profile.objects.get(user=request.user)
-    if post.user in profile.friends.all() and post.private or post.user in profile.following.all() and post.public:
+    if post.user == request.user or post.user in profile.friends.all() and post.private or post.user in profile.following.all() and post.public:
         comments = []
         # print(post.comments.all())
         for comment in post.comments.all():
