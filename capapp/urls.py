@@ -23,5 +23,6 @@ urlpatterns = [
     path('make_comment/<int:post_id>/<int:comment_id>', views.make_comment, name="make_comment"),
     path('edit_comment/<int:comment_id>', views.edit_comment, name="edit_comment"),
     path('delete_comment/<int:comment_id>', views.delete_comment, name="delete_comment"),
-    path('get_comments/<int:post_id>', views.get_comments, name="get_comments")
+    path('get_comments/<int:post_id>', views.get_comments, name="get_comments"),
+    path('get_friends_followers_following/<int:user_id>', views.get_friends_followers_following, name="get_friends_followers_following")
 ]

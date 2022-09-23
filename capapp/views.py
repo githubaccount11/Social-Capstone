@@ -168,9 +168,9 @@ def profile(request, user_id):
         context["education"] = profile.education
         context["birthday"] = profile.birthday
         context["date_joined"] = profile.date_joined
-        context["friends"] = profile.friends.all()
-        context["followers"] = profile.followers.all()
-        context["following"] = profile.following.all()
+        context["friends"] = list(profile.friends.all())
+        context["followers"] = list(profile.followers.all())
+        context["following"] = list(profile.following.all())
     return render(request, 'capapp/profile.html', context)
 
 @login_required
@@ -409,7 +409,7 @@ def delete_post(request, post_id):
 def delete_image(request, image_id):
     image = Images.objects.get(id=image_id)
     image.delete()
-    return redirect(request.path)
+    return redirect(f'../profile/{image.user.id}')
 
 def comments(request, post_id):
     post = Post.objects.get(id=post_id)
@@ -500,3 +500,12 @@ def get_subments(request, comment_id):
                 'subments': get_subments(request, subment.id)
             })
     return comments
+
+def get_friends_followers_following(request, user_id):
+    profile = Profile.objects.get(user=User.objects.get(id=user_id))
+    data = {
+        'friends': list(profile.friends.all().values("user_profile__profile_image", "first_name", "last_name", "id", "user_profile__lat", "user_profile__long")),
+        'followers': list(profile.followers.all().values("user_profile__profile_image", "first_name", "last_name", "id", "user_profile__lat", "user_profile__long")),
+        'following': list(profile.following.all().values("user_profile__profile_image", "first_name", "last_name", "id", "user_profile__lat", "user_profile__long"))
+    }
+    return JsonResponse({"data": data})
