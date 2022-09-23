@@ -249,9 +249,11 @@ def logout(request):
     auth.logout(request)
     return redirect('login')
 
+@login_required
 def search(request):
     return render(request, 'capapp/search.html')
 
+@login_required
 def search_run(request, page, search_query):
     users = User.objects.filter(Q(username__icontains=search_query) | Q(first_name__icontains=search_query) | Q(last_name__icontains=search_query))[page*30:(page+1)*30]
     # users = users.exclude(username=request.user.username)
@@ -264,6 +266,7 @@ def search_run(request, page, search_query):
             index += 1
     return JsonResponse({"data": user_list})
 
+@login_required
 def friend(request, user_id):
     profile = Profile.objects.get(user=request.user)
     other_profile = Profile.objects.get(user__id=user_id)
@@ -291,6 +294,7 @@ def friend(request, user_id):
     other_profile.save()
     return redirect(f'../profile/{user_id}')
 
+@login_required
 def follow(request, user_id):
     profile = Profile.objects.get(user=request.user)
     other_profile = Profile.objects.get(user=user_id)
@@ -307,6 +311,7 @@ def follow(request, user_id):
     other_profile.save()
     return redirect(f'../profile/{user_id}')
 
+@login_required
 def block(request, user_id):
     profile = Profile.objects.get(user=request.user)
     blocked = profile.blocked.filter(id=user_id)
@@ -406,18 +411,21 @@ def edit_post(request, post_id):
             return redirect('../')
     return redirect('../')
 
+@login_required
 def delete_post(request, post_id):
     post = Post.objects.get(id=post_id)
     if post.user == request.user:
         post.delete()
     return redirect(f'../')
 
+@login_required
 def delete_image(request, image_id):
     image = Images.objects.get(id=image_id)
     if image.user == request.user:
         image.delete()
     return redirect(f'../profile/{image.user.id}')
 
+@login_required
 def comments(request, post_id):
     profile = Profile.objects.get(user=request.user)
     post = Post.objects.get(id=post_id)
@@ -428,6 +436,7 @@ def comments(request, post_id):
         return render(request, 'capapp/comments.html', context)
     return redirect('../')
 
+@login_required
 def make_comment(request, post_id, comment_id):
     profile = Profile.objects.get(user=request.user)
     post = Post.objects.get(id=post_id)
@@ -458,6 +467,7 @@ def make_comment(request, post_id, comment_id):
         return render(request, 'capapp/make_comment.html', context)
     return redirect('../../')
 
+@login_required
 def edit_comment(request, comment_id):
     if request.method == "GET":
         try:
@@ -487,12 +497,14 @@ def edit_comment(request, comment_id):
             return redirect(f'../comments/{comment.post.id}')
     return redirect(f'../comments/{comment.post.id}')
 
+@login_required
 def delete_comment(request, comment_id):
     comment = Comments.objects.get(id=comment_id)
     if comment.user == request.user:
         comment.delete()
     return redirect(f'../')
 
+@login_required
 def get_comments(request, post_id):
     post = Post.objects.get(id=post_id)
     profile = Profile.objects.get(user=request.user)
@@ -524,6 +536,7 @@ def get_subments(request, comment_id):
             })
     return comments
 
+@login_required
 def get_friends_followers_following(request, user_id):
     if user_id == request.user.id:
         profile = Profile.objects.get(user=User.objects.get(id=user_id))
