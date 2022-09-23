@@ -364,20 +364,24 @@ def edit_post(request, post_id):
     if request.method == "GET":
         try:
             post = Post.objects.get(id=post_id)
+            if post.user != request.user:
+                return redirect('../')
         except post.DoesNotExist:
-            return redirect(f'../')
+            return redirect('../')
         if request.user == post.user:
             context = {
                 "post": post
             }
             return render(request, 'capapp/edit_post.html', context)
         else:
-            return redirect(f'../')
+            return redirect('../')
     elif request.method == "POST":
         try:
             post = Post.objects.get(id=post_id)
+            if post.user != request.user:
+                return redirect('../')
         except Post.DoesNotExist:
-            return redirect(f'../')
+            return redirect('../')
         if request.user == post.user:
             form = request.POST
             if form.get('public') == 'on':
@@ -399,55 +403,66 @@ def edit_post(request, post_id):
             profile = Profile.objects.get(user=request.user)
             profile.images.add(image)
             profile.save()
-            return redirect(f'../')
-    return redirect(f'../')
+            return redirect('../')
+    return redirect('../')
 
 def delete_post(request, post_id):
-    Post.objects.get(id=post_id).delete()
+    post = Post.objects.get(id=post_id)
+    if post.user == request.user:
+        post.delete()
     return redirect(f'../')
 
 def delete_image(request, image_id):
     image = Images.objects.get(id=image_id)
-    image.delete()
+    if image.user == request.user:
+        image.delete()
     return redirect(f'../profile/{image.user.id}')
 
 def comments(request, post_id):
+    profile = Profile.objects.get(user=request.user)
     post = Post.objects.get(id=post_id)
-    context = {
-        'post': post
-    }
-    return render(request, 'capapp/comments.html', context)
-
-def make_comment(request, post_id, comment_id):
-    post = Post.objects.get(id=post_id)
-    if request.method == "POST":
-        form = request.POST
-        comment = Comments()
-        comment.text_content = form.get('text_content')
-        comment.user = request.user
-        comment.post = post
-        if comment_id != 0:
-            comment.parentment = Comments.objects.get(id=comment_id)
-        comment.save()
-        return redirect('comments', post_id=post_id)
-    if comment_id != 0:
-        comment = Comments.objects.filter(id=comment_id)
-        if comment:
-            context = {
-                'post': post,
-                'comment': comment[0]
-            }
-    else:
+    if post.user in profile.friends.all() and post.private or post.user in profile.following.all() and post.public:
         context = {
-            'comment': False,
             'post': post
         }
-    return render(request, 'capapp/make_comment.html', context)
+        return render(request, 'capapp/comments.html', context)
+    return redirect('../')
+
+def make_comment(request, post_id, comment_id):
+    profile = Profile.objects.get(user=request.user)
+    post = Post.objects.get(id=post_id)
+    if post.user in profile.friends.all() and post.private or post.user in profile.following.all() and post.public:
+        if request.method == "POST":
+            form = request.POST
+            comment = Comments()
+            comment.text_content = form.get('text_content')
+            comment.user = request.user
+            comment.post = post
+            if comment_id != 0:
+                comment.parentment = Comments.objects.get(id=comment_id)
+            comment.save()
+            return redirect('comments', post_id=post_id)
+        if comment_id != 0:
+            comment = Comments.objects.filter(id=comment_id)
+            if comment:
+                context = {
+                    'post': post,
+                    'comment': comment[0]
+                }
+        else:
+            context = {
+                'comment': False,
+                'post': post
+            }
+        return render(request, 'capapp/make_comment.html', context)
+    return redirect('../')
 
 def edit_comment(request, comment_id):
     if request.method == "GET":
         try:
             comment = Comments.objects.get(id=comment_id)
+            if comment.user != request.user:
+                return redirect('../')
         except comment.DoesNotExist:
             return redirect(f'../')
         if request.user == comment.user:
@@ -460,6 +475,8 @@ def edit_comment(request, comment_id):
     elif request.method == "POST":
         try:
             comment = Comments.objects.get(id=comment_id)
+            if comment.user != request.user:
+                return redirect('../')
         except Post.DoesNotExist:
             return redirect(f'../comments/{comment.post.id}')
         if request.user == comment.user:
@@ -470,25 +487,30 @@ def edit_comment(request, comment_id):
     return redirect(f'../comments/{comment.post.id}')
 
 def delete_comment(request, comment_id):
-    Comments.objects.get(id=comment_id).delete()
+    comment = Comments.objects.get(id=comment_id)
+    if comment.user == request.user:
+        comment.delete()
     return redirect(f'../')
 
 def get_comments(request, post_id):
     post = Post.objects.get(id=post_id)
-    comments = []
-    # print(post.comments.all())
-    for comment in post.comments.all():
-        if request.user not in list(Profile.objects.get(user=comment.user).blocked.all()):
-            comments.append({
-                'comment': {"id": comment.id, "post_id": comment.post.id, "text_content": comment.text_content, "user__first_name": comment.user.first_name, "user__last_name": comment.user.last_name, "user__id": comment.user.id, "date_created": comment.date_created, "date_edited": comment.date_edited},
-                'subments': get_subments(request, comment.id)
-            })
-    data = [
-        comments,
-        request.user.id
-    ]
-    # print(comments)
-    return JsonResponse({"data": data})
+    profile = Profile.objects.get(user=request.user)
+    if post.user in profile.friends.all() and post.private or post.user in profile.following.all() and post.public:
+        comments = []
+        # print(post.comments.all())
+        for comment in post.comments.all():
+            if request.user not in list(Profile.objects.get(user=comment.user).blocked.all()):
+                comments.append({
+                    'comment': {"id": comment.id, "post_id": comment.post.id, "text_content": comment.text_content, "user__first_name": comment.user.first_name, "user__last_name": comment.user.last_name, "user__id": comment.user.id, "date_created": comment.date_created, "date_edited": comment.date_edited},
+                    'subments': get_subments(request, comment.id)
+                })
+        data = [
+            comments,
+            request.user.id
+        ]
+        # print(comments)
+        return JsonResponse({"data": data})
+    return JsonResponse({"data": ""})
 
 def get_subments(request, comment_id):
     comment = Comments.objects.get(id=comment_id)
@@ -502,10 +524,12 @@ def get_subments(request, comment_id):
     return comments
 
 def get_friends_followers_following(request, user_id):
-    profile = Profile.objects.get(user=User.objects.get(id=user_id))
-    data = {
-        'friends': list(profile.friends.all().values("user_profile__profile_image", "first_name", "last_name", "id", "user_profile__lat", "user_profile__long")),
-        'followers': list(profile.followers.all().values("user_profile__profile_image", "first_name", "last_name", "id", "user_profile__lat", "user_profile__long")),
-        'following': list(profile.following.all().values("user_profile__profile_image", "first_name", "last_name", "id", "user_profile__lat", "user_profile__long"))
-    }
-    return JsonResponse({"data": data})
+    if user_id == request.user.id:
+        profile = Profile.objects.get(user=User.objects.get(id=user_id))
+        data = {
+            'friends': list(profile.friends.all().values("user_profile__profile_image", "first_name", "last_name", "id", "user_profile__lat", "user_profile__long")),
+            'followers': list(profile.followers.all().values("user_profile__profile_image", "first_name", "last_name", "id", "user_profile__lat", "user_profile__long")),
+            'following': list(profile.following.all().values("user_profile__profile_image", "first_name", "last_name", "id", "user_profile__lat", "user_profile__long"))
+        }
+        return JsonResponse({"data": data})
+    return JsonResponse({"data": ""})
