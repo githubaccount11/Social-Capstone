@@ -338,7 +338,15 @@ def index(request):
         else:
             post.private = False
         post.image = form.get('image')
-        post.video = form.get('video')
+        video = form.get('video')
+        if "youtube.com" in video:
+            if "watch?v=" in video:
+                video = video.replace("watch?v=", "embed/")
+        elif "youtu.be" in video:
+            video = video.replace("youtu.be/", "youtube.com/embed/")
+        else:
+            video = ""
+        post.video = video
         post.save()
         image = Images()
         image.user = request.user
@@ -399,7 +407,15 @@ def edit_post(request, post_id):
                 post.private = False
             post.text_content = form.get('text_content')
             post.image = form.get('image')
-            post.video = form.get('video')
+            video = form.get('video')
+            if "youtube.com" in video:
+                if "watch?v=" in video:
+                    video = video.replace("watch?v=", "embed/")
+            elif "youtu.be" in video:
+                video = video.replace("youtu.be/", "youtube.com/embed/")
+            else:
+                video = ""
+            post.video = video
             post.save()
             image = Images()
             image.user = request.user

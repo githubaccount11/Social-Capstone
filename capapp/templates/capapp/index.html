@@ -65,9 +65,13 @@
                         <a class="text-slate-500" href="{% url 'profile' post.user.id %}">{{post.user.first_name}} {{post.user.last_name}}</a>
                         <span class="text-slate-500">Created: {{post.date_created}}</span>
                         <span class="text-slate-500">Edited: {{post.date_edited}}</span>
-                        {% if post.image %}
-                            <img class="border h-96" src={{post.image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s post">
-                        {% endif %}
+                        <div class="flex items-center justify-center">
+                            {% if post.image %}
+                                <img class="border h-96" src={{post.image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s post">
+                            {% elif post.video %}
+                                <iframe width="560" height="320" src="{{post.video}}&origin=http://localhost" alt="{{post.user.first_name}} {{post.user.last_name}}'s post"></iframe>
+                            {% endif %}
+                        </div>
                         <p>{{post.text_content}}</p>
                     </div>
                 </div>

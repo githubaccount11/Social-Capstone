@@ -1,12 +1,12 @@
 
 function showComments(comment, parent_id, user_id) {
     // do something with comment
-    collapseDiv = document.createElement("div")
+    const collapseDiv = document.createElement("div")
     collapseDiv.setAttribute("name", `collapse-${parent_id}`)
-    div = document.createElement("div")
-    figure = document.createElement("figure")
+    const div = document.createElement("div")
+    const figure = document.createElement("figure")
     figure.className = "bg-slate-50 rounded-xl p-8 m-2"
-    figureDiv = document.createElement("div")
+    const figureDiv = document.createElement("div")
     figureDiv.className = "space-y-4"
     div.setAttribute("id",`comment-${comment.comment.id}`);
     let parent;
