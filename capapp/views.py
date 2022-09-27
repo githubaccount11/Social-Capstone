@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import auth
 from django.contrib.auth.models import User
 from .forms import AuthForm, ProfileForm
-from .models import Post, Profile, Comments, Images
+from .models import Post, Profile, Comments, Images, Chat, Message
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse
@@ -102,7 +102,7 @@ def profile(request, user_id):
     # print("followees:", profile.following.all())
     
     if user != request.user:
-        print("users are equivalent")
+        # print("users are equivalent")
         your_profile = Profile.objects.get(user=request.user)
         friend = "Friend"
         follower = False
@@ -120,7 +120,7 @@ def profile(request, user_id):
         if your_profile.blocked.filter(id=user_id):
             blocked = True
         #print("profile image:", profile.profile_image)
-        print("unconfirmed:", profile.unconfirmed.all())
+        # print("unconfirmed:", profile.unconfirmed.all())
         context = {
             "user" : user,
             "friend": friend,
@@ -300,11 +300,11 @@ def follow(request, user_id):
     other_profile = Profile.objects.get(user=user_id)
     followee = profile.following.filter(id=user_id)
     if followee:
-        print("remove follower")
+        # print("remove follower")
         profile.following.remove(followee[0])
         other_profile.followers.remove(request.user)
     else:
-        print("add follower")
+        # print("add follower")
         profile.following.add(User.objects.get(id=user_id))
         other_profile.followers.add(request.user)
     profile.save()
@@ -456,7 +456,7 @@ def comments(request, post_id):
 def make_comment(request, post_id, comment_id):
     profile = Profile.objects.get(user=request.user)
     post = Post.objects.get(id=post_id)
-    print(request.user.id)
+    # print(request.user.id)
     if post.user == request.user or post.user in profile.friends.all() and post.private or post.user in profile.following.all() and post.public:
         if request.method == "POST":
             form = request.POST
@@ -492,7 +492,7 @@ def edit_comment(request, comment_id):
             if comment.user != request.user:
                 return redirect('../')
         except comment.DoesNotExist:
-            return redirect(f'../')
+            return redirect('../')
         if request.user == comment.user:
             context = {
                 "comment": comment
@@ -547,7 +547,7 @@ def get_comments(request, post_id):
 def get_subments(request, comment_id):
     comment = Comments.objects.get(id=comment_id)
     comments = []
-    print("subments:", comment.subments.all())
+    # print("subments:", comment.subments.all())
     for subment in comment.subments.all():
         if request.user not in list(Profile.objects.get(user=comment.user).blocked.all()):
             comments.append({
@@ -566,4 +566,46 @@ def get_friends_followers_following(request, user_id):
             'following': list(profile.following.all().values("user_profile__profile_image", "first_name", "last_name", "id", "user_profile__lat", "user_profile__long"))
         }
         return JsonResponse({"data": data})
+    return JsonResponse({"data": ""})
+
+@login_required
+def chat(request, friend_id):
+    profile = Profile.objects.get(user=request.user)
+    friend = User.objects.get(id=friend_id)
+    if friend in profile.friends.all():
+        if not Chat.objects.filter(Q(users=friend)).filter(Q(users=request.user)):
+            # print("new chat")
+            chat = Chat()
+            chat.save()
+            chat.users.add(friend)
+            chat.users.add(request.user)
+        context = {
+            'friend': friend
+        }
+        return render(request, 'capapp/chat.html', context)
+    else:
+        return redirect('../')
+
+@login_required
+def get_messages(request, friend_id):
+    chat = Chat.objects.filter(Q(users=User.objects.get(id=friend_id))).filter(Q(users=request.user))
+    messages = []
+    # print("subments:", comment.subments.all())
+    for message in chat[0].messages.all():
+        messages.append({
+            'message': {"text_content": message.text_content, "date_created": message.date_created}
+        })
+    data = {
+        'messages': messages
+    }
+    return JsonResponse({"data": data})
+
+@login_required
+def send_message(request, friend_id, message_content):
+    chat = Chat.objects.filter(Q(users=User.objects.get(id=friend_id))).filter(Q(users=request.user))
+    message = Message()
+    message.text_content = message_content
+    message.chat = chat[0]
+    message.save()
+    chat[0].messages.add(message)
     return JsonResponse({"data": ""})

@@ -56,4 +56,11 @@ class Comments(models.Model):
     parentment = models.ForeignKey('self', on_delete=models.CASCADE, related_name="subments", blank=True, null=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments", blank=True, null=True)
 
-    
+class Chat(models.Model):
+    users = models.ManyToManyField(User, related_name="user_chat", blank=True)
+
+class Message(models.Model):
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="user_message", blank=True, null=True)
+    text_content = models.CharField(max_length=200, blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name="messages")

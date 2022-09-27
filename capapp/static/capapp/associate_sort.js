@@ -139,14 +139,14 @@ function createElements(persons, followee, follower) {
         personDiv = document.createElement("div")
         personDiv.className = "mx-2"
         imageA = document.createElement("a")
-        imageA.href = `{% url 'profile' ${person.id} %}`
+        imageA.href = `${person.id}`
         image = document.createElement("img")
         image.className = "border w-24 h-24 rounded-full"
         image.src = `${person.user_profile__profile_image}`
         image.alt = `${person.first_name} ${person.last_name}'s profile picture`
         imageA.appendChild(image)
         nameA = document.createElement("a")
-        nameA.href = `{% url 'profile' ${person.id} %}`
+        nameA.href = `${person.id}`
         firstName = document.createElement("p")
         firstName.textContent = `${person.first_name}`
         lastName = document.createElement("p")
