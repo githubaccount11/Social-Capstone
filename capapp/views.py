@@ -19,8 +19,8 @@ def register(request):
                 user = User.objects.create_user(
                     username=form.cleaned_data['username'],
                     password=form.cleaned_data['password'],
-                    first_name=form.cleaned_data['first_name'],
-                    last_name=form.cleaned_data['last_name'],
+                    first_name=form.cleaned_data['first_name'].title(),
+                    last_name=form.cleaned_data['last_name'].title(),
                 )
                 auth.login(request, user)
                 return redirect('../register_profile')
@@ -463,9 +463,10 @@ def make_comment(request, post_id, comment_id):
             comment = Comments()
             comment.text_content = form.get('text_content')
             comment.user = request.user
-            comment.post = post
             if comment_id != 0:
                 comment.parentment = Comments.objects.get(id=comment_id)
+            else: 
+                comment.post = post
             comment.save()
             return redirect('comments', post_id=post_id)
         if comment_id != 0:
@@ -528,14 +529,16 @@ def get_comments(request, post_id):
         comments = []
         # print(post.comments.all())
         for comment in post.comments.all():
+            # print(comment.subments.all())
             if request.user not in list(Profile.objects.get(user=comment.user).blocked.all()):
                 comments.append({
-                    'comment': {"id": comment.id, "post_id": comment.post.id, "text_content": comment.text_content, "user__first_name": comment.user.first_name, "user__last_name": comment.user.last_name, "user__id": comment.user.id, "date_created": comment.date_created, "date_edited": comment.date_edited},
+                    'comment': {"id": comment.id, "text_content": comment.text_content, "user__first_name": comment.user.first_name, "user__last_name": comment.user.last_name, "user__id": comment.user.id, "date_created": comment.date_created, "date_edited": comment.date_edited},
                     'subments': get_subments(request, comment.id)
                 })
         data = [
             comments,
-            request.user.id
+            request.user.id,
+            post_id
         ]
         # print(comments)
         return JsonResponse({"data": data})
@@ -544,10 +547,11 @@ def get_comments(request, post_id):
 def get_subments(request, comment_id):
     comment = Comments.objects.get(id=comment_id)
     comments = []
+    print("subments:", comment.subments.all())
     for subment in comment.subments.all():
         if request.user not in list(Profile.objects.get(user=comment.user).blocked.all()):
             comments.append({
-                'comment': {"id": subment.id, "post_id": subment.post.id, "text_content": subment.text_content, "user__first_name": subment.user.first_name, "user__last_name": subment.user.last_name, "user__id": subment.user.id, "date_created": subment.date_created, "date_edited": subment.date_edited},
+                'comment': {"id": subment.id, "text_content": subment.text_content, "user__first_name": subment.user.first_name, "user__last_name": subment.user.last_name, "user__id": subment.user.id, "date_created": subment.date_created, "date_edited": subment.date_edited},
                 'subments': get_subments(request, subment.id)
             })
     return comments

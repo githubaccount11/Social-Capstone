@@ -54,6 +54,6 @@ class Comments(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_edited = models.DateTimeField(auto_now=True)
     parentment = models.ForeignKey('self', on_delete=models.CASCADE, related_name="subments", blank=True, null=True)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments", blank=True, null=True)
 
     

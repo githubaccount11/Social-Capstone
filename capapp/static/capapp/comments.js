@@ -1,5 +1,4 @@
-
-function showComments(comment, parent_id, user_id) {
+function showComments(comment, parent_id, user_id, post_id) {
     // do something with comment
     const collapseDiv = document.createElement("div")
     collapseDiv.setAttribute("name", `collapse-${parent_id}`)
@@ -23,6 +22,7 @@ function showComments(comment, parent_id, user_id) {
     
     const a = document.createElement("a")
     a.href = `../profile/${comment.comment.user__id}`
+    a.className = "text-slate-500 pr-3"
     figureDiv.appendChild(a)
 
     const firstSpan = document.createElement("span")
@@ -33,11 +33,17 @@ function showComments(comment, parent_id, user_id) {
     a.appendChild(lastSpan)
 
     const createdSpan = document.createElement("span")
-    createdSpan.textContent = `created: ${comment.comment.date_created} `
+    createdSpan.className = "text-slate-500 px-3"
+    let dateTime = moment(comment.comment.date_created);
+    dateTime = moment(dateTime).format('MMMM Do YYYY, h:mm a');
+    createdSpan.textContent = `Created: ${dateTime}`
     figureDiv.appendChild(createdSpan)
 
     const editedSpan = document.createElement("span")
-    editedSpan.textContent = `edited: ${comment.comment.date_edited}`
+    editedSpan.className = "text-slate-500 px-3"
+    let editedDateTime = moment(comment.comment.date_edited);
+    editedDateTime = moment(editedDateTime).format('MMMM Do YYYY, h:mm a');
+    editedSpan.textContent = `Edited: ${editedDateTime}`
     figureDiv.appendChild(editedSpan)
 
     const p = document.createElement("p")
@@ -64,7 +70,7 @@ function showComments(comment, parent_id, user_id) {
     const makeComment = document.createElement("a")
     makeComment.textContent = "Comment"
     makeComment.className = "mx-4 inline-block px-6 py-2.5 bg-sky-200 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-sky-300 hover:shadow-lg focus:bg-sky-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-sky-400 active:shadow-lg transition duration-150 ease-in-out"
-    makeComment.href = `../make_comment/${comment.comment.post_id}/${comment.comment.id}`
+    makeComment.href = `../make_comment/${post_id}/${comment.comment.id}`
     figureDiv.appendChild(makeComment)
     
     if (user_id == comment.comment.user__id) {
@@ -81,7 +87,7 @@ function showComments(comment, parent_id, user_id) {
     }
 
     for (subment of comment.subments) {
-        showComments(subment, comment.comment.id, user_id)
+        showComments(subment, comment.comment.id, user_id, post_id)
     }
 }
 
@@ -91,6 +97,6 @@ fetch(`/get_comments/${post}`)
     results = data.data
     console.log(results)
     for (comment of results[0]) {
-        showComments(comment, 0, results[1])
+        showComments(comment, 0, results[1], results[2])
     }
 })
