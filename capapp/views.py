@@ -593,7 +593,7 @@ def get_messages(request, friend_id):
     # print("subments:", comment.subments.all())
     for message in chat[0].messages.all():
         messages.append({
-            'message': {"text_content": message.text_content, "date_created": message.date_created}
+            'message': {"first_name": message.user.first_name, "last_name": message.user.last_name, "profile_image": message.user.user_profile.profile_image, "user_id": message.user.id,"text_content": message.text_content, "date_created": message.date_created}
         })
     data = {
         'messages': messages
@@ -606,6 +606,7 @@ def send_message(request, friend_id, message_content):
     message = Message()
     message.text_content = message_content
     message.chat = chat[0]
+    message.user = request.user
     message.save()
     chat[0].messages.add(message)
     return JsonResponse({"data": ""})

@@ -60,7 +60,7 @@ class Chat(models.Model):
     users = models.ManyToManyField(User, related_name="user_chat", blank=True)
 
 class Message(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="user_message", blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="user_message")
     text_content = models.CharField(max_length=200, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name="messages")

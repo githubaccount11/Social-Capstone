@@ -5,6 +5,7 @@
 {% block header %}
 <script>
     const friend = {{friend.id}};
+    const user_self = {{request.user.id}};
 </script>
 <script defer src="https://momentjs.com/downloads/moment.js"></script>
 <script defer src="{% static 'capapp/messages.js' %}"></script>

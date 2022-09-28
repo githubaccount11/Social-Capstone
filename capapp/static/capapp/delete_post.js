@@ -5,9 +5,10 @@ function delete_post(post) {
     
     if (userSelection == true){
         fetch(`/delete_post/${post}`)
-        .then(
+        .then( () => {
             alert("Your post was deleted!")
-        )
+            window.location('/')
+        })
     } else {
         alert("Your post is not deleted!");
     }
