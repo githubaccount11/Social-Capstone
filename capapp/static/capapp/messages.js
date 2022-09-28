@@ -1,15 +1,29 @@
 const sendBtn = document.getElementById('send-btn')
 const messageBox = document.getElementById('message-box')
 const parent = document.querySelector("#messages")
+const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
 sendBtn.addEventListener("click", function() {
-    fetch(`/send_message/${friend}/${messageBox.value}`)
+    console.log(JSON.stringify({message: messageBox.value}))
+    fetch(`/send_message/${friend}`, {
+        method: "post",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        mode: 'same-origin',
+      
+        //make sure to serialize your JSON body
+        body: JSON.stringify({
+          text: messageBox.value
+        })
+    })    
     .then( () => {
         messageBox.value = ""
         fetchMessages()
     })
 })
-
 function showMessages(message) {
     // do something with comment
     const div = document.createElement("div")
@@ -71,7 +85,7 @@ function fetchMessages() {
     fetch(`/get_messages/${friend}`)
     .then(response => response.json())
     .then(data => {
-        console.log(data.data)
+        // console.log(data.data)
         parent.innerHTML = ""
         for (message of data.data.messages) {
             showMessages(message)

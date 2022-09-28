@@ -27,5 +27,5 @@ urlpatterns = [
     path('get_friends_followers_following/<int:user_id>', views.get_friends_followers_following, name="get_friends_followers_following"),
     path('chat/<int:friend_id>', views.chat, name="chat"),
     path('get_messages/<int:friend_id>', views.get_messages, name="get_messages"),
-    path('send_message/<int:friend_id>/<str:message_content>', views.send_message, name="send_message")
+    path('send_message/<int:friend_id>', views.send_message, name="send_message")
 ]

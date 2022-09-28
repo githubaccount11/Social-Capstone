@@ -7,6 +7,7 @@ from .models import Post, Profile, Comments, Images, Chat, Message
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse
+import json
 
 # Create your views here.
 def register(request):
@@ -601,12 +602,16 @@ def get_messages(request, friend_id):
     return JsonResponse({"data": data})
 
 @login_required
-def send_message(request, friend_id, message_content):
-    chat = Chat.objects.filter(Q(users=User.objects.get(id=friend_id))).filter(Q(users=request.user))
-    message = Message()
-    message.text_content = message_content
-    message.chat = chat[0]
-    message.user = request.user
-    message.save()
-    chat[0].messages.add(message)
+def send_message(request, friend_id):
+    friend = User.objects.get(id=friend_id)
+    profile = Profile.objects.get(user=request.user)
+    if friend in profile.friends.all():
+        chat = Chat.objects.filter(Q(users=User.objects.get(id=friend_id))).filter(Q(users=request.user))
+        message = Message()
+        print(json.loads(request.body)['text'])
+        message.text_content = json.loads(request.body)['text']
+        message.chat = chat[0]
+        message.user = request.user
+        message.save()
+        chat[0].messages.add(message)
     return JsonResponse({"data": ""})

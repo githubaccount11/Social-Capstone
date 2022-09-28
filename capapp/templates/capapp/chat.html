@@ -13,6 +13,7 @@
 {% block title %}Chat with {{friend.first_name}}{% endblock title %}
 {% block content %}
 <div id="messages"></div>
+{% csrf_token %}
 <div class="flex bottom-0">
     <textarea
     class="
