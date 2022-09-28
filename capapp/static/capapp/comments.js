@@ -46,9 +46,10 @@ function showComments(comment, parent_id, user_id, post_id) {
     editedSpan.textContent = `Edited: ${editedDateTime}`
     figureDiv.appendChild(editedSpan)
 
-    const p = document.createElement("p")
-    p.textContent = comment.comment.text_content
-    figureDiv.appendChild(p)
+    const pre = document.createElement("pre")
+    pre.className = "font-sans"
+    pre.textContent = comment.comment.text_content
+    figureDiv.appendChild(pre)
 
     const collapse = document.createElement("button")
     collapse.addEventListener("click", function(event) {

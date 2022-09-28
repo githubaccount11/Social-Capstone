@@ -4,7 +4,7 @@ const parent = document.querySelector("#messages")
 const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
 sendBtn.addEventListener("click", function() {
-    console.log(JSON.stringify({message: messageBox.value}))
+    // console.log(JSON.stringify({message: messageBox.value}))
     fetch(`/send_message/${friend}`, {
         method: "post",
         headers: {
@@ -53,14 +53,15 @@ function showMessages(message) {
     image.alt = `${message.message.first_name} ${message.message.last_name}'s profile picture`
     imageA.appendChild(image)
 
-    const p = document.createElement("p")
-    p.textContent = message.message.text_content
-    
+    const pre = document.createElement("pre")
+    pre.className = "font-sans"
+    pre.textContent = message.message.text_content
+    console.log(message.message.text_content)
     if (message.message.user_id == user_self) {
         div.className = "ml-10"
-        flexDiv.classList.add("text-right", "justify-end")
+        flexDiv.classList.add("justify-end")
         
-        flexDiv.appendChild(p)
+        flexDiv.appendChild(pre)
         dateAndImageDiv.appendChild(createdSpan)
         const imageDiv = document.createElement("div")
         imageDiv.className = "flex justify-end"
@@ -74,7 +75,7 @@ function showMessages(message) {
         flexDiv.appendChild(dateAndImageDiv)
         dateAndImageDiv.appendChild(createdSpan)
         dateAndImageDiv.appendChild(imageA)
-        flexDiv.appendChild(p)
+        flexDiv.appendChild(pre)
     }                     
 
 }
