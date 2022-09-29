@@ -366,6 +366,14 @@ def index(request):
             feed.pop(index)
         else:
             index += 1
+    index = 0
+    while index < len(feed):
+        index_two = index + 1
+        while index_two < len(feed):
+            if feed[index] == feed[index_two]:
+                feed.pop(index_two)
+            index_two += 1
+        index += 1
     feed.sort(key = lambda x:x.date_created)
     feed = feed[::-1]
     context = {
