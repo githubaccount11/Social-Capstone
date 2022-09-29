@@ -44,7 +44,7 @@
                     <div>
                         {% if unconfirmed %}
                             <p>Unconfirmed:</p>
-                            <div class="flex w-4/5 flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
+                            <div class="flex w-screen flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
                                 {% for potential in unconfirmed %}
                                     <div class="mx-2">
                                         <a href="{% url 'profile' potential.id %}"><img class=" border w-24 h-24 rounded-full" src={{potential.user_profile.profile_image}} alt="{{potential.first_name}} {{potential.last_name}}'s profile picture"></a>
@@ -172,6 +172,8 @@
                         <span class="text-slate-500">Edited: {{post.date_edited}}</span>
                         {% if post.image %}
                             <img class="border h-96" src={{post.image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s post">
+                        {% elif post.video %}
+                            <iframe width="560" height="320" src="{{post.video}}&origin=http://localhost" alt="{{post.user.first_name}} {{post.user.last_name}}'s post"></iframe>
                         {% endif %}
                         <p>{{post.text_content}}</p>
                     </div>

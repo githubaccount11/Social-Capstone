@@ -7,7 +7,7 @@ function delete_comment(comment) {
         fetch(`/delete_comment/${comment}`)
         .then( () => {
             alert("Your comment was deleted!")
-            window.location('/')
+            window.location = "/"
         })
     } else {
         alert("Your comment is not deleted!");

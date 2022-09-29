@@ -56,7 +56,7 @@ function showMessages(message) {
     const pre = document.createElement("pre")
     pre.className = "font-sans"
     pre.textContent = message.message.text_content
-    console.log(message.message.text_content)
+    // console.log(message.message.text_content)
     if (message.message.user_id == user_self) {
         div.className = "ml-10"
         flexDiv.classList.add("justify-end")

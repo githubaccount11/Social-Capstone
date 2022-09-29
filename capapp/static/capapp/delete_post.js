@@ -7,7 +7,7 @@ function delete_post(post) {
         fetch(`/delete_post/${post}`)
         .then( () => {
             alert("Your post was deleted!")
-            window.location('/')
+            window.location = "/"
         })
     } else {
         alert("Your post is not deleted!");
