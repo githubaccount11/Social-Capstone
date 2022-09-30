@@ -44,10 +44,10 @@
                     <div>
                         {% if unconfirmed %}
                             <p>Unconfirmed:</p>
-                            <div class="flex w-screen flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
+                            <div class="flex w-4/5 flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
                                 {% for potential in unconfirmed %}
                                     <div class="mx-2">
-                                        <a href="{% url 'profile' potential.id %}"><img class=" border w-24 h-24 rounded-full" src={{potential.user_profile.profile_image}} alt="{{potential.first_name}} {{potential.last_name}}'s profile picture"></a>
+                                        <a href="{% url 'profile' potential.id %}"><img class=" border w-24 h-24 rounded-full" src="{{potential.user_profile.profile_image}}" alt="{{potential.first_name}} {{potential.last_name}}'s profile picture"></a>
                                         <a href="{% url 'profile' potential.id %}"><p>{{potential.first_name}}</p><p>{{potential.last_name}}</p></a>
                                     </div>
                                 {% endfor %}
@@ -80,7 +80,7 @@
         <div class="flex w-screen flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar justify-items-start mb-8">
             {% for image in user.user_profile.images.all %}
                 <div class="shrink-0">  
-                    <img class="border h-96" src={{image.url}} alt="{{user.first_name}} {{user.last_name}}'s gallery">
+                    <img class="border h-96" src="{{image.url}}" alt="{{user.first_name}} {{user.last_name}}'s gallery">
                     {% if user == request.user %}
                         <a class="top-0 right-0 inline-block px-6 py-2.5 bg-rose-200 text-white font-large text-xl leading-tight uppercase rounded shadow-md hover:bg-rose-300 hover:shadow-lg focus:bg-rose-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-rose-400 active:shadow-lg transition duration-150 ease-in-out" 
                         href="{% url 'delete_image' image.id %}">X</a>
@@ -125,7 +125,7 @@
             <div class="flex w-screen flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
                 {% for friend in friends %}
                     <div class="mx-2">
-                        <a href="{% url 'profile' friend.id %}"><img class=" border w-24 h-24 rounded-full" src={{friend.user_profile.profile_image}} alt="{{friend.first_name}} {{friend.last_name}}'s profile picture"></a>
+                        <a href="{% url 'profile' friend.id %}"><img class=" border w-24 h-24 rounded-full" src="{{friend.user_profile.profile_image}}" alt="{{friend.first_name}} {{friend.last_name}}'s profile picture"></a>
                         <a href="{% url 'profile' friend.id %}"><p>{{friend.first_name}}</p><p>{{friend.last_name}}</p></a>
                     </div>
                 {% endfor %}
@@ -136,7 +136,7 @@
             <div class="flex w-screen flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
                 {% for follower in followers %}
                     <div class="mx-2">
-                        <a href="{% url 'profile' follower.id %}"><img class=" border w-24 h-24 rounded-full" src={{follower.user_profile.profile_image}} alt="{{follower.first_name}} {{follower.last_name}}'s profile picture"></a>
+                        <a href="{% url 'profile' follower.id %}"><img class=" border w-24 h-24 rounded-full" src="{{follower.user_profile.profile_image}}" alt="{{follower.first_name}} {{follower.last_name}}'s profile picture"></a>
                         <a href="{% url 'profile' follower.id %}"><p>{{follower.first_name}}</p><p>{{follower.last_name}}</p></a>
                     </div>
                 {% endfor %}
@@ -147,7 +147,7 @@
             <div class="flex w-screen flex-no-wrap overflow-x-scroll scrolling-touch hide-scroll-bar items-start mb-8">
                 {% for followee in following %}
                     <div class="mx-2">
-                        <a href="{% url 'profile' followee.id %}"><img class=" border w-24 h-24 rounded-full" src={{followee.user_profile.profile_image}} alt="{{followee.first_name}} {{followee.last_name}}'s profile picture"></a>
+                        <a href="{% url 'profile' followee.id %}"><img class=" border w-24 h-24 rounded-full" src="{{followee.user_profile.profile_image}}" alt="{{followee.first_name}} {{followee.last_name}}'s profile picture"></a>
                         <a href="{% url 'profile' followee.id %}"><p>{{followee.first_name}}</p><p>{{followee.last_name}}</p></a>
                     </div>
                 {% endfor %}
@@ -165,7 +165,7 @@
         <figure class="bg-slate-50 rounded-xl p-4 m-2">
             <div class="space-y-4" id="post">
                 <div class="flex" id="post-head">
-                    <a href="{% url 'profile' post.user.id %}"><img class="mr-2 border w-24 h-24 rounded-full" src={{post.user.user_profile.profile_image}} alt="{{post.user.first_name}} {{post.user.last_name}}'s profile picture"></a>
+                    <a href="{% url 'profile' post.user.id %}"><img class="mr-2 border w-24 h-24 rounded-full" src="{{post.user.user_profile.profile_image}}" alt="{{post.user.first_name}} {{post.user.last_name}}'s profile picture"></a>
                     <div class="text-left">    
                         <a class="text-slate-500" href="{% url 'profile' post.user.id %}">{{post.user.first_name}} {{post.user.last_name}}</a>
                         <span class="text-slate-500">Created: {{post.date_created}}</span>
