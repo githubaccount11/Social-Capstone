@@ -1,12 +1,12 @@
-from typing import Tuple
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import auth
 from django.contrib.auth.models import User
 from .forms import AuthForm, ProfileForm
-from .models import Post, Profile, Comments, Images
+from .models import Post, Profile, Comments, Images, Chat, Message
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse
+import json
 
 # Create your views here.
 def register(request):
@@ -102,7 +102,7 @@ def profile(request, user_id):
     # print("followees:", profile.following.all())
     
     if user != request.user:
-        print("users are equivalent")
+        # print("users are equivalent")
         your_profile = Profile.objects.get(user=request.user)
         friend = "Friend"
         follower = False
@@ -120,7 +120,7 @@ def profile(request, user_id):
         if your_profile.blocked.filter(id=user_id):
             blocked = True
         #print("profile image:", profile.profile_image)
-        print("unconfirmed:", profile.unconfirmed.all())
+        # print("unconfirmed:", profile.unconfirmed.all())
         context = {
             "user" : user,
             "friend": friend,
@@ -234,7 +234,7 @@ def login(request):
                 next = request.GET.get('next')
                 if next:
                     return redirect(next)
-                return redirect(f'../profile/{request.user.id}')
+                return redirect(f'../')
         form.add_error(error="Invalid username or password", field="username")
         context = {
             "form": form
@@ -260,66 +260,74 @@ def search_run(request, page, search_query):
     user_list = list(users.values("username", "first_name", "last_name", "id", "user_profile__profile_image", "user_profile"))
     index = 0
     while index < len(user_list):
-        if user_list[index]["username"] == request.user.username or request.user in list(Profile.objects.get(id=user_list[index]["user_profile"]).blocked.all()):
+        if user_list[index]["username"] == request.user.username:
             user_list.pop(index)
-        else:
+        elif Profile.objects.filter(id=user_list[index]["user_profile"]):
+            if request.user in list(Profile.objects.get(id=user_list[index]["user_profile"]).blocked.all()):
+                user_list.pop(index)
+            else:
+                index += 1
+        else:    
             index += 1
     return JsonResponse({"data": user_list})
 
 @login_required
 def friend(request, user_id):
-    profile = Profile.objects.get(user=request.user)
-    other_profile = Profile.objects.get(user__id=user_id)
-    friend = profile.friends.filter(id=user_id)
-    if friend:
-        #if friends then remove friendship
-        profile.friends.remove(friend[0])
-        other_profile.friends.remove(request.user)
-    else:
-        unconfirmed = profile.unconfirmed.filter(id=user_id)
-        if unconfirmed:
-            #if you haven't confirmed then remove confirm and add friends
-            profile.unconfirmed.remove(unconfirmed[0])
-            profile.friends.add(User.objects.get(id=user_id))
-            other_profile.friends.add(request.user)
+    if user_id != request.user.id:
+        profile = Profile.objects.get(user=request.user)
+        other_profile = Profile.objects.get(user__id=user_id)
+        friend = profile.friends.filter(id=user_id)
+        if friend:
+            #if friends then remove friendship
+            profile.friends.remove(friend[0])
+            other_profile.friends.remove(request.user)
         else:
-            your_unconfirmed = other_profile.unconfirmed.filter(id=request.user.id)
-            if your_unconfirmed:
-                #if they haven't confirmed then remove request
-                other_profile.unconfirmed.remove(your_unconfirmed[0])
+            unconfirmed = profile.unconfirmed.filter(id=user_id)
+            if unconfirmed:
+                #if you haven't confirmed then remove confirm and add friends
+                profile.unconfirmed.remove(unconfirmed[0])
+                profile.friends.add(User.objects.get(id=user_id))
+                other_profile.friends.add(request.user)
             else:
-                #if neither friends nor confirmed send confirmation request
-                other_profile.unconfirmed.add(request.user)
-    profile.save()
-    other_profile.save()
+                your_unconfirmed = other_profile.unconfirmed.filter(id=request.user.id)
+                if your_unconfirmed:
+                    #if they haven't confirmed then remove request
+                    other_profile.unconfirmed.remove(your_unconfirmed[0])
+                else:
+                    #if neither friends nor confirmed send confirmation request
+                    other_profile.unconfirmed.add(request.user)
+        profile.save()
+        other_profile.save()
     return redirect(f'../profile/{user_id}')
 
 @login_required
 def follow(request, user_id):
-    profile = Profile.objects.get(user=request.user)
-    other_profile = Profile.objects.get(user=user_id)
-    followee = profile.following.filter(id=user_id)
-    if followee:
-        print("remove follower")
-        profile.following.remove(followee[0])
-        other_profile.followers.remove(request.user)
-    else:
-        print("add follower")
-        profile.following.add(User.objects.get(id=user_id))
-        other_profile.followers.add(request.user)
-    profile.save()
-    other_profile.save()
+    if user_id != request.user.id:
+        profile = Profile.objects.get(user=request.user)
+        other_profile = Profile.objects.get(user=user_id)
+        followee = profile.following.filter(id=user_id)
+        if followee:
+            # print("remove follower")
+            profile.following.remove(followee[0])
+            other_profile.followers.remove(request.user)
+        else:
+            # print("add follower")
+            profile.following.add(User.objects.get(id=user_id))
+            other_profile.followers.add(request.user)
+        profile.save()
+        other_profile.save()
     return redirect(f'../profile/{user_id}')
 
 @login_required
 def block(request, user_id):
-    profile = Profile.objects.get(user=request.user)
-    blocked = profile.blocked.filter(id=user_id)
-    if blocked:
-        profile.blocked.remove(blocked[0])
-    else:
-        profile.blocked.add(User.objects.get(id=user_id))
-    profile.save()
+    if user_id != request.user.id:
+        profile = Profile.objects.get(user=request.user)
+        blocked = profile.blocked.filter(id=user_id)
+        if blocked:
+            profile.blocked.remove(blocked[0])
+        else:
+            profile.blocked.add(User.objects.get(id=user_id))
+        profile.save()
     return redirect(f'../profile/{user_id}')
 
 @login_required
@@ -357,7 +365,7 @@ def index(request):
         profile.save()
         return redirect('../')
     feed = list(Post.objects.filter(Q(user__in=request.user.user_profile.following.all()) & Q(public=True)))
-    feed += list(Post.objects.filter(Q(user__in=request.user.user_profile.friends.all()) & Q(private=True)))
+    feed += list(Post.objects.filter(Q(user__in=request.user.user_profile.friends.all()) & Q(private=True) & ~Q(user__in=request.user.user_profile.following.all())))
     feed += list(Post.objects.filter(user=request.user))
     index = 0
     while index < len(feed):
@@ -365,6 +373,7 @@ def index(request):
             feed.pop(index)
         else:
             index += 1
+    index = 0
     feed.sort(key = lambda x:x.date_created)
     feed = feed[::-1]
     context = {
@@ -445,7 +454,7 @@ def delete_image(request, image_id):
 def comments(request, post_id):
     profile = Profile.objects.get(user=request.user)
     post = Post.objects.get(id=post_id)
-    if post.user == request.user or post.user in profile.friends.all() and post.private or post.user in profile.following.all() and post.public:
+    if post.user == request.user or post.user in list(profile.friends.all()) and post.private or post.user in list(profile.following.all()) and post.public:
         context = {
             'post': post
         }
@@ -456,8 +465,8 @@ def comments(request, post_id):
 def make_comment(request, post_id, comment_id):
     profile = Profile.objects.get(user=request.user)
     post = Post.objects.get(id=post_id)
-    print(request.user.id)
-    if post.user == request.user or post.user in profile.friends.all() and post.private or post.user in profile.following.all() and post.public:
+    # print(request.user.id)
+    if post.user == request.user or post.user in list(profile.friends.all()) and post.private or post.user in list(profile.following.all()) and post.public:
         if request.method == "POST":
             form = request.POST
             comment = Comments()
@@ -492,7 +501,7 @@ def edit_comment(request, comment_id):
             if comment.user != request.user:
                 return redirect('../')
         except comment.DoesNotExist:
-            return redirect(f'../')
+            return redirect('../')
         if request.user == comment.user:
             context = {
                 "comment": comment
@@ -525,7 +534,7 @@ def delete_comment(request, comment_id):
 def get_comments(request, post_id):
     post = Post.objects.get(id=post_id)
     profile = Profile.objects.get(user=request.user)
-    if post.user == request.user or post.user in profile.friends.all() and post.private or post.user in profile.following.all() and post.public:
+    if post.user == request.user or post.user in list(profile.friends.all()) and post.private or post.user in list(profile.following.all()) and post.public:
         comments = []
         # print(post.comments.all())
         for comment in post.comments.all():
@@ -547,7 +556,7 @@ def get_comments(request, post_id):
 def get_subments(request, comment_id):
     comment = Comments.objects.get(id=comment_id)
     comments = []
-    print("subments:", comment.subments.all())
+    # print("subments:", comment.subments.all())
     for subment in comment.subments.all():
         if request.user not in list(Profile.objects.get(user=comment.user).blocked.all()):
             comments.append({
@@ -566,4 +575,51 @@ def get_friends_followers_following(request, user_id):
             'following': list(profile.following.all().values("user_profile__profile_image", "first_name", "last_name", "id", "user_profile__lat", "user_profile__long"))
         }
         return JsonResponse({"data": data})
+    return JsonResponse({"data": ""})
+
+@login_required
+def chat(request, friend_id):
+    profile = Profile.objects.get(user=request.user)
+    friend = User.objects.get(id=friend_id)
+    if friend in list(profile.friends.all()):
+        if not Chat.objects.filter(Q(users=friend)).filter(Q(users=request.user)):
+            # print("new chat")
+            chat = Chat()
+            chat.save()
+            chat.users.add(friend)
+            chat.users.add(request.user)
+        context = {
+            'friend': friend
+        }
+        return render(request, 'capapp/chat.html', context)
+    else:
+        return redirect('../')
+
+@login_required
+def get_messages(request, friend_id):
+    chat = Chat.objects.filter(Q(users=User.objects.get(id=friend_id))).filter(Q(users=request.user))
+    messages = []
+    # print("subments:", comment.subments.all())
+    for message in chat[0].messages.all():
+        messages.append({
+            'message': {"first_name": message.user.first_name, "last_name": message.user.last_name, "profile_image": message.user.user_profile.profile_image, "user_id": message.user.id,"text_content": message.text_content, "date_created": message.date_created}
+        })
+    data = {
+        'messages': messages
+    }
+    return JsonResponse({"data": data})
+
+@login_required
+def send_message(request, friend_id):
+    friend = User.objects.get(id=friend_id)
+    profile = Profile.objects.get(user=request.user)
+    if friend in list(profile.friends.all()):
+        chat = Chat.objects.filter(Q(users=User.objects.get(id=friend_id))).filter(Q(users=request.user))
+        message = Message()
+        print(json.loads(request.body)['text'])
+        message.text_content = json.loads(request.body)['text']
+        message.chat = chat[0]
+        message.user = request.user
+        message.save()
+        chat[0].messages.add(message)
     return JsonResponse({"data": ""})

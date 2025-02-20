@@ -46,16 +46,17 @@ function showComments(comment, parent_id, user_id, post_id) {
     editedSpan.textContent = `Edited: ${editedDateTime}`
     figureDiv.appendChild(editedSpan)
 
-    const p = document.createElement("p")
-    p.textContent = comment.comment.text_content
-    figureDiv.appendChild(p)
+    const pre = document.createElement("pre")
+    pre.className = "font-sans"
+    pre.textContent = comment.comment.text_content
+    figureDiv.appendChild(pre)
 
     const collapse = document.createElement("button")
     collapse.addEventListener("click", function(event) {
         toCollapse = document.getElementsByName(`collapse-${comment.comment.id}`)
-        console.log(toCollapse)
+        // console.log(toCollapse)
         for (collapsable of toCollapse) {
-            console.log(collapsable)
+            // console.log(collapsable)
             if (collapsable.style.display == "block") {
                 collapsable.style.display = "none"
             } else {
@@ -94,9 +95,7 @@ function showComments(comment, parent_id, user_id, post_id) {
 fetch(`/get_comments/${post}`)
 .then(response => response.json())
 .then(data => {
-    results = data.data
-    console.log(results)
-    for (comment of results[0]) {
-        showComments(comment, 0, results[1], results[2])
+    for (comment of data.data[0]) {
+        showComments(comment, 0, data.data[1], data.data[2])
     }
 })

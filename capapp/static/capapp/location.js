@@ -6,5 +6,5 @@ navigator.geolocation.getCurrentPosition((position) => {
     lat.textContent = position.coords.latitude
     long.textContent = position.coords.longitude
 }, err => {
-    console.error(err)
+    // console.error(err)
 })

@@ -24,5 +24,8 @@ urlpatterns = [
     path('edit_comment/<int:comment_id>', views.edit_comment, name="edit_comment"),
     path('delete_comment/<int:comment_id>', views.delete_comment, name="delete_comment"),
     path('get_comments/<int:post_id>', views.get_comments, name="get_comments"),
-    path('get_friends_followers_following/<int:user_id>', views.get_friends_followers_following, name="get_friends_followers_following")
+    path('get_friends_followers_following/<int:user_id>', views.get_friends_followers_following, name="get_friends_followers_following"),
+    path('chat/<int:friend_id>', views.chat, name="chat"),
+    path('get_messages/<int:friend_id>', views.get_messages, name="get_messages"),
+    path('send_message/<int:friend_id>', views.send_message, name="send_message")
 ]
